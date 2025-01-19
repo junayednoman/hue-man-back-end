@@ -9,16 +9,6 @@ import {
   updateCategoryValidationSchema,
 } from "./category.validation";
 
-const createManyCategories = handleAsyncRequest(async (req, res) => {
-  const payload: TCategory[] = req.body.categories;
-  const result = await categoryServices.createManyCategories(payload);
-  successResponse(res, {
-    message: "Categories created successfully!",
-    data: result,
-    status: 201,
-  });
-});
-
 const createCategory = handleAsyncRequest(async (req, res) => {
   // Handle uploaded file (if any)
   const imageFile = req.file;
@@ -26,14 +16,11 @@ const createCategory = handleAsyncRequest(async (req, res) => {
     throw new AppError(400, "Please provide an image file");
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const image = imageFile?.location;
+  const image = `uploads/images/${imageFile.filename}`;
   const textData = JSON.parse(req?.body?.data);
   const payload = {
     image,
     name: textData.name,
-    status: textData?.status,
   };
 
   handleZodValidation(categoryCreateValidationSchema);
@@ -41,6 +28,16 @@ const createCategory = handleAsyncRequest(async (req, res) => {
   const result = await categoryServices.createCategory(payload);
   successResponse(res, {
     message: "Category created successfully!",
+    data: result,
+    status: 201,
+  });
+});
+
+const createManyCategories = handleAsyncRequest(async (req, res) => {
+  const payload: TCategory[] = req.body.categories;
+  const result = await categoryServices.createManyCategories(payload);
+  successResponse(res, {
+    message: "Categories created successfully!",
     data: result,
     status: 201,
   });
@@ -67,16 +64,15 @@ const getSingleCategory = handleAsyncRequest(async (req, res) => {
 const updateCategory = handleAsyncRequest(async (req, res) => {
   const id = req.params.id;
 
-  const payload = {} as TCategory;
-
   // Handle uploaded file (if any)
   const imageFile = req.file;
-  if (imageFile) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const image = imageFile?.location;
-    payload.image = image;
-  }
+
+  const image = imageFile && `uploads/images/${imageFile?.filename}`;
+  const textData = JSON.parse(req?.body?.data);
+  const payload = {
+    image,
+    name: textData.name,
+  };
 
   handleZodValidation(updateCategoryValidationSchema);
 

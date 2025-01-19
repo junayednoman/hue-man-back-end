@@ -6,13 +6,17 @@ import routeNotFound from "./app/middlewares/routeNotFound";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: ["http://localhost:5000"] }));
 app.use(express.json());
 app.use("/api/v1", router);
 
 app.get("/", (req, res) => {
   res.json({ message: "Hello Developer!" });
 });
+
+// Serve static files from the 'uploads' directory
+app.use("/images", express.static('uploads/images'));
+app.use("/audio", express.static('uploads/audio'));
 
 // handle global errors
 app.use(globalErrorHandler);

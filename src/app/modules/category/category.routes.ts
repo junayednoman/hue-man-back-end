@@ -1,15 +1,15 @@
 import { Router } from "express";
 import authVerify from "../../middlewares/authVerify";
 import categoryControllers from "./category.controller";
-import { multerUploader } from "../../utils/multerS3Uploader";
 import { handleZodValidation } from "../../middlewares/handleZodValidation";
 import { createManyCategoriesValidationSchema } from "./category.validation";
+import { uploadSingleImage } from "../../utils/multerFIleUploader";
 const categoryRouters = Router();
 
 categoryRouters.post(
   "/",
   authVerify(["admin"]),
-  multerUploader.uploadSingle,
+  uploadSingleImage,
   categoryControllers.createCategory
 );
 
@@ -31,7 +31,7 @@ categoryRouters.get(
 categoryRouters.put(
   "/:id",
   authVerify(["admin"]),
-  multerUploader.uploadSingle,
+  uploadSingleImage,
   categoryControllers.updateCategory
 );
 

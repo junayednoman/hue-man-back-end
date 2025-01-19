@@ -14,7 +14,7 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.log("error:", err);
+  // console.log("error:", err);
 
   let message = "Something went wrong!";
   let statusCode = 500;
@@ -43,8 +43,8 @@ const globalErrorHandler = (
     const errorPaths =
       errorKeys.length > 1
         ? errorKeys.slice(0, -1).join(", ") +
-          " & " +
-          errorKeys[errorKeys.length - 1]
+        " & " +
+        errorKeys[errorKeys.length - 1]
         : errorKeys[0];
 
     const errorValues = Object.values(err.errors);

@@ -1,15 +1,14 @@
 import { AppError } from "../../classes/appError";
 import QueryBuilder from "../../classes/queryBuilder";
-import { deleteSingleImageFromS3 } from "../../utils/deletes3Image";
+import { deleteFile } from "../../utils/deleteFile";
 import { TCategory } from "./category.interface";
 import CategoryModel from "./category.model";
 
 const createCategory = async (payload: TCategory) => {
   const category = await CategoryModel.findOne({ name: payload.name });
   if (category) {
-    const objectKey = payload.image.split(".com/")[1];
     // delete the newly uploaded image if category already exists
-    deleteSingleImageFromS3(objectKey);
+    await deleteFile(payload.image);
     throw new AppError(400, "Category already exists");
   }
 
@@ -22,11 +21,6 @@ const createManyCategories = async (payload: TCategory[]) => {
   const categories = await CategoryModel.find({ name: { $in: cateNames } })
   if (categories && categories.length > 0) {
     const existingCategoryNames = categories.map((cat) => cat.name);
-    // categories.forEach((category) => {
-    //   const objectKey = category.image.split(".com/")[1];
-    //   // delete the newly uploaded image if category already exists
-    //   deleteSingleImageFromS3(objectKey);
-    // });
     const newCategories = payload.filter((cat) => !existingCategoryNames.includes(cat.name));
     const result = await CategoryModel.insertMany(newCategories);
     const existingMessage = categories.length == 1 ? `A category already exists with the name: ${categories[0].name}` : "Following categories already exist: " + existingCategoryNames.join(", ")
@@ -69,20 +63,23 @@ const updateCategory = async (
   payload: {
     name?: string;
     image?: string;
-    status?: "active" | "inactive";
   }
 ) => {
   const category = await CategoryModel.findOne({ _id, is_deleted: false });
-  if (!category) throw new AppError(404, "Category not found");
+  if (!category) {
+    if (payload.image) {
+      await deleteFile(payload.image);
+    }
+    throw new AppError(404, "Category not found");
+  }
 
   const result = await CategoryModel.findOneAndUpdate({ _id }, payload, {
     new: true,
   });
 
-  // delete old image from s3 bucket
+  // delete old image from
   if (result && payload.image) {
-    const objectKey = category.image.split(".com/")[1];
-    deleteSingleImageFromS3(objectKey);
+    await deleteFile(category.image);
   }
   return result;
 };
