@@ -36,6 +36,16 @@ const createCard = handleAsyncRequest(async (req, res) => {
   });
 });
 
+const createCards = handleAsyncRequest(async (req, res) => {
+  const payload = req.body?.cards;
+  const result = await cardServices.createCards(payload);
+  successResponse(res, {
+    message: "Cards created successfully!",
+    data: result,
+    status: 201,
+  });
+});
+
 const getAllCards = handleAsyncRequest(async (req, res) => {
   const query = req.query;
   const currentUser = req?.body?.currentUser;
@@ -58,6 +68,7 @@ const addNotInterested = handleAsyncRequest(async (req, res) => {
 
 const cardControllers = {
   createCard,
+  createCards,
   getAllCards,
   addNotInterested,
 };

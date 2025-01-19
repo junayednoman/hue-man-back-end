@@ -35,6 +35,11 @@ const createCard = async (payload: TCard) => {
   return result;
 };
 
+const createCards = async (payload: TCard[]) => {
+  const result = await CardModel.insertMany(payload);
+  return result;
+}
+
 const getAllCards = async (query: Record<string, any>, currentUser: string) => {
   const searchableFields = ["location", "author.name", "currentUser"];
   const queryLogic: any = {
@@ -80,6 +85,7 @@ const cardServices = {
   createCard,
   getAllCards,
   addNotInterested,
+  createCards
 };
 
 export default cardServices;

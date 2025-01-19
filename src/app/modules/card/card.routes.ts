@@ -11,6 +11,12 @@ cardRouters.post(
   cardControllers.createCard
 );
 
+cardRouters.post(
+  "/many",
+  authVerify(["admin"]),
+  cardControllers.createCards
+);
+
 cardRouters.get("/", cardControllers.getAllCards);
 
 cardRouters.post("/", authVerify(["user"]), cardControllers.addNotInterested);
