@@ -5,12 +5,6 @@ const categorySchema = new Schema<TCategory>(
   {
     image: { type: String, required: true },
     name: { type: String, required: true, trim: true },
-    status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
-      required: false,
-    },
     is_deleted: { type: Boolean, default: false },
   },
   {

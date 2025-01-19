@@ -1,4 +1,5 @@
 import { AppError } from "../../classes/appError";
+import QueryBuilder from "../../classes/queryBuilder";
 import { deleteSingleImageFromS3 } from "../../utils/deletes3Image";
 import { TCategory } from "./category.interface";
 import CategoryModel from "./category.model";
@@ -16,9 +17,45 @@ const createCategory = async (payload: TCategory) => {
   return result;
 };
 
-const getAllCategories = async () => {
-  const result = await CategoryModel.find({ is_deleted: false });
+const createManyCategories = async (payload: TCategory[]) => {
+  const cateNames = payload.map((cat) => cat.name);
+  const categories = await CategoryModel.find({ name: { $in: cateNames } })
+  if (categories && categories.length > 0) {
+    const existingCategoryNames = categories.map((cat) => cat.name);
+    // categories.forEach((category) => {
+    //   const objectKey = category.image.split(".com/")[1];
+    //   // delete the newly uploaded image if category already exists
+    //   deleteSingleImageFromS3(objectKey);
+    // });
+    const newCategories = payload.filter((cat) => !existingCategoryNames.includes(cat.name));
+    const result = await CategoryModel.insertMany(newCategories);
+    const existingMessage = categories.length == 1 ? `A category already exists with the name: ${categories[0].name}` : "Following categories already exist: " + existingCategoryNames.join(", ")
+    return { data: result, message: existingMessage };
+  }
+
+  const result = await CategoryModel.insertMany(payload);
   return result;
+};
+
+const getAllCategories = async (query: Record<string, any>) => {
+  const searchableFields = [
+    "name",
+  ];
+  const categoryQuery = new QueryBuilder(
+    CategoryModel.find({
+      is_deleted: false,
+    }),
+    query
+  )
+    .search(searchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .selectFields();
+
+  const meta = await categoryQuery.countTotal();
+  const result = await categoryQuery.queryModel;
+  return { data: result, meta };
 };
 
 const getSingleCategory = async (_id: string) => {
@@ -75,5 +112,6 @@ const categoryServices = {
   getSingleCategory,
   updateCategory,
   deleteCategory,
+  createManyCategories
 };
 export default categoryServices;

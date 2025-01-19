@@ -1,6 +1,5 @@
 export type TCategory = {
-  image: string;
   name: string;
-  status: "active" | "inactive";
+  image: string;
   is_deleted?: boolean;
 };

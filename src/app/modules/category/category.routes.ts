@@ -2,6 +2,8 @@ import { Router } from "express";
 import authVerify from "../../middlewares/authVerify";
 import categoryControllers from "./category.controller";
 import { multerUploader } from "../../utils/multerS3Uploader";
+import { handleZodValidation } from "../../middlewares/handleZodValidation";
+import { createManyCategoriesValidationSchema } from "./category.validation";
 const categoryRouters = Router();
 
 categoryRouters.post(
@@ -9,6 +11,13 @@ categoryRouters.post(
   authVerify(["admin"]),
   multerUploader.uploadSingle,
   categoryControllers.createCategory
+);
+
+categoryRouters.post(
+  "/many",
+  authVerify(["admin"]),
+  handleZodValidation(createManyCategoriesValidationSchema),
+  categoryControllers.createManyCategories
 );
 
 categoryRouters.get("/", categoryControllers.getAllCategories);

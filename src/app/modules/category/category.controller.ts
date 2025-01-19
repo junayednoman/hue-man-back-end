@@ -9,6 +9,16 @@ import {
   updateCategoryValidationSchema,
 } from "./category.validation";
 
+const createManyCategories = handleAsyncRequest(async (req, res) => {
+  const payload: TCategory[] = req.body.categories;
+  const result = await categoryServices.createManyCategories(payload);
+  successResponse(res, {
+    message: "Categories created successfully!",
+    data: result,
+    status: 201,
+  });
+});
+
 const createCategory = handleAsyncRequest(async (req, res) => {
   // Handle uploaded file (if any)
   const imageFile = req.file;
@@ -37,7 +47,8 @@ const createCategory = handleAsyncRequest(async (req, res) => {
 });
 
 const getAllCategories = handleAsyncRequest(async (req, res) => {
-  const result = await categoryServices.getAllCategories();
+  const query = req.query;
+  const result = await categoryServices.getAllCategories(query);
   successResponse(res, {
     message: "Categories retrieved successfully!",
     data: result,
@@ -56,15 +67,7 @@ const getSingleCategory = handleAsyncRequest(async (req, res) => {
 const updateCategory = handleAsyncRequest(async (req, res) => {
   const id = req.params.id;
 
-  let payload = {} as TCategory;
-
-  if (req?.body?.data) {
-    const textData = JSON.parse(req?.body?.data);
-    payload = {
-      name: textData?.name,
-      status: textData?.status,
-    } as TCategory;
-  }
+  const payload = {} as TCategory;
 
   // Handle uploaded file (if any)
   const imageFile = req.file;
@@ -100,6 +103,7 @@ const categoryControllers = {
   getSingleCategory,
   updateCategory,
   deleteCategory,
+  createManyCategories
 };
 
 export default categoryControllers;
