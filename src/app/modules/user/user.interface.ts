@@ -1,0 +1,20 @@
+export type TUserProfile = {
+  profile_image: string;
+  cover_image: string;
+  name: string;
+  location: string;
+  gender: "male" | "female";
+  age: number;
+  category: string;
+  pet_info: string;
+  owner_name: string;
+  owner_profile_picture: string;
+  user_type: "subscriber" | "unsubscriber";
+  owner_relationship: "single" | "married" | "divorced" | "widowed" | "other";
+  owner_gender: "male" | "female" | "other";
+  owner_email: string;
+  is_deleted: boolean;
+  is_blocked: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
