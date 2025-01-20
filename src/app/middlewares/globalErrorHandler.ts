@@ -101,18 +101,19 @@ const globalErrorHandler = (
   } else if (err.name === "TokenExpiredError") {
     statusCode = 401;
     message = err?.message;
-  } else if (err.name === "MulterError") {
-    statusCode = 400;
-    if (err.code === "LIMIT_UNEXPECTED_FILE") {
-      message = "Maximum 5 images are allowed!";
-      errorSource = [
-        {
-          path: "",
-          message: "Maximum 5 images are allowed!",
-        },
-      ];
-    }
   }
+  // else if (err.name === "MulterError") {
+  //   statusCode = 400;
+  //   if (err.code === "LIMIT_UNEXPECTED_FILE") {
+  //     message = "Maximum 5 images are allowed!";
+  //     errorSource = [
+  //       {
+  //         path: "",
+  //         message: "Maximum 5 images are allowed!",
+  //       },
+  //     ];
+  //   }
+  // }
 
   // ultimate error response
   res.status(statusCode).json({

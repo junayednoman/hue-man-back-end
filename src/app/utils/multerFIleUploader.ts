@@ -33,8 +33,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
   }
 };
 
-// Configure multer for single file uploads
-const upload = multer({
+export const upload = multer({
   storage,
   fileFilter,
   limits: {
@@ -47,5 +46,6 @@ export const uploadSingleImage = upload.single("image"); // For uploading a sing
 export const uploadSingleAudio = upload.single("audio"); // For uploading a single audio file
 export const uploadImageAndAudio = upload.fields([
   { name: "image", maxCount: 1 }, // Single image field
+  { name: "story", maxCount: 10 }, // Single image field
   { name: "audio", maxCount: 1 }, // Single audio field
 ]);
