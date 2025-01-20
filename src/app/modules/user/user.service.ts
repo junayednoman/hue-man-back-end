@@ -8,11 +8,13 @@ import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import QueryBuilder from "../../classes/queryBuilder";
 import { TUserProfile } from "./user.interface";
+import { deleteFile } from "../../utils/deleteFile";
+import { defaultProfileImg } from "../../constants/global.constant";
 
 const signUp = async (payload: TSignUp) => {
   // check if user exists
   const auth = await AuthModel.findOne({ email: payload.email });
-  const user = await UserModel.findOne({ owner_email: payload.email });
+  const user = await UserModel.findOne({ email: payload.email });
   if (auth && user) {
     throw new AppError(400, "User already exists");
   }
@@ -37,7 +39,7 @@ const signUp = async (payload: TSignUp) => {
     const newAuth = await AuthModel.create([authData], { session });
     const userData = {
       name: payload.name,
-      owner_email: payload.email,
+      email: payload.email,
     };
     const newUser = await UserModel.create([userData], { session });
 
@@ -64,11 +66,12 @@ const signUp = async (payload: TSignUp) => {
 
 const getAllUsers = async (query: Record<string, any>) => {
   const searchableFields = [
-    "college_name",
-    "coach_name",
-    "coach_title",
-    "coach_email",
+    "name",
+    "email",
+    "gender",
+    "age",
   ];
+
   const userQuery = new QueryBuilder(
     UserModel.find({
       is_deleted: false,
@@ -85,7 +88,6 @@ const getAllUsers = async (query: Record<string, any>) => {
   const meta = await userQuery.countTotal();
   const result = await userQuery.queryModel;
   return { data: result, meta };
-  // return await UserModel.find({ is_blocked: false, is_deleted: false });
 };
 
 const getSingleUser = async (id: string) => {
@@ -105,21 +107,21 @@ const updateUser = async (
   payload: Partial<TUserProfile>,
   userEmail: string
 ) => {
-  const user = await UserModel.findOne({
-    _id: id,
-    is_blocked: false,
-    is_deleted: false,
-  });
-  if (!user) {
-    throw new AppError(404, "User not found");
+  const user = await UserModel.findById(id);
+  if (!user) throw new AppError(404, "User not found");
+
+  if (userEmail && userEmail !== user.email) {
+    throw new AppError(403, "Forbidden");
   }
 
-  if (userEmail && userEmail !== user.owner_email) {
-    throw new AppError(401, "Unauthorized");
-  }
   const result = await UserModel.findByIdAndUpdate(user._id, payload, {
     new: true,
   });
+
+  if (result && payload.image && user.image !== defaultProfileImg) {
+    await deleteFile(user.image);
+  }
+
   return result;
 };
 
@@ -133,7 +135,7 @@ const deleteUser = async (_id: string, userEmail: string) => {
 
   if (user.is_deleted) throw new AppError(400, "User already deleted");
 
-  if (userEmail && userEmail !== user.owner_email) {
+  if (userEmail && userEmail !== user.email) {
     throw new AppError(401, "Unauthorized");
   }
 
@@ -150,7 +152,7 @@ const deleteUser = async (_id: string, userEmail: string) => {
 
     // Update related AuthModel record
     await AuthModel.findOneAndUpdate(
-      { email: user.owner_email },
+      { email: user.email },
       { is_deleted: true },
       { session }
     );

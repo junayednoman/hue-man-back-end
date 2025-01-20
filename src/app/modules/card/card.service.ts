@@ -40,21 +40,11 @@ const createCards = async (payload: TCard[]) => {
   return result;
 }
 
-const getAllCards = async (query: Record<string, any>, currentUser: string) => {
-  const searchableFields = ["location", "author.name", "currentUser"];
-  const queryLogic: any = {
-    is_deleted: false,
-    is_blocked: false,
-  };
+const getAllCards = async (query: Record<string, any>) => {
+  const searchableFields = ["name"];
 
-  // Add the `not_interests` condition only if `currentUser` exists
-  if (currentUser) {
-    queryLogic.not_interests = { $nin: [currentUser] };
-  }
   const cardQuery = new QueryBuilder(
-    CardModel.find(queryLogic)
-      .populate("author", "name profile_image")
-      .populate("category", "name"),
+    CardModel.find(),
     query
   )
     .search(searchableFields)
@@ -68,23 +58,9 @@ const getAllCards = async (query: Record<string, any>, currentUser: string) => {
   return { data: result, meta };
 };
 
-const addNotInterested = async (cardId: string, userId: string) => {
-  const card = await CardModel.findOne({ _id: cardId, is_deleted: false });
-  if (!card) throw new AppError(404, "card not found");
-  const user = await AuthModel.findOne({ _id: userId, is_deleted: false });
-  if (!user) throw new AppError(404, "User not found");
-  const result = await CardModel.findOneAndUpdate(
-    { _id: cardId },
-    { $addToSet: { not_interests: userId } },
-    { new: true }
-  );
-  return result;
-};
-
 const cardServices = {
   createCard,
   getAllCards,
-  addNotInterested,
   createCards
 };
 

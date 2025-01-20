@@ -4,6 +4,7 @@ import adminRouters from "../modules/admin/admin.routes";
 import userRouters from "../modules/user/user.routes";
 import categoryRouters from "../modules/category/category.routes";
 import cardRouters from "../modules/card/card.routes";
+import deskRoutes from "../modules/desk/desk.routes";
 
 const router = Router();
 
@@ -13,6 +14,7 @@ const apiRoutes = [
   { path: "/users", route: userRouters },
   { path: "/categories", route: categoryRouters },
   { path: "/cards", route: cardRouters },
+  { path: "/desk-cards", route: deskRoutes },
 ];
 
 apiRoutes.forEach((route) => {

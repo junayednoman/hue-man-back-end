@@ -19,6 +19,5 @@ cardRouters.post(
 
 cardRouters.get("/", cardControllers.getAllCards);
 
-cardRouters.post("/", authVerify(["user"]), cardControllers.addNotInterested);
 
 export default cardRouters;

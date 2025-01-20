@@ -1,8 +1,7 @@
 import { Router } from "express";
 import authVerify from "../../middlewares/authVerify";
 import userControllers from "./user.controller";
-import { handleZodValidation } from "../../middlewares/handleZodValidation";
-import { userProfileUpdateValidationSchema } from "./user.validation";
+import { uploadSingleImage } from "../../utils/multerFIleUploader";
 
 const userRouters = Router();
 
@@ -15,7 +14,7 @@ userRouters.get(
 userRouters.put(
   "/:id",
   authVerify(["admin", "user"]),
-  handleZodValidation(userProfileUpdateValidationSchema),
+  uploadSingleImage,
   userControllers.updateUser
 );
 userRouters.delete(

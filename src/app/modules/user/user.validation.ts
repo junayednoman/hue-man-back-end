@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const userSignupValidationSchema = z.object({
   name: z.string().trim().nonempty("Name is required"),
+  gender: z.enum(["Male", "Female", "Other"]).optional(),
   email: z
     .string()
     .email("Invalid email address")
@@ -12,27 +13,17 @@ export const userSignupValidationSchema = z.object({
     .min(7, "Password must be at least 7 characters long"),
 });
 
-export const userProfileUpdateValidationSchema = z.object({
-  profile_image: z.string().optional(),
-  cover_image: z.string().optional(),
-  name: z.string().optional(),
-  location: z.string().optional(),
-  gender: z.enum(["male", "female"]).optional(),
-  age: z.number().optional(),
-  category: z.string().optional(),
-  pet_info: z.string().optional(),
-  owner_name: z.string().optional(),
-  owner_profile_picture: z.string().optional(),
-  user_type: z.enum(["subscriber", "unsubscriber"]).optional(),
-  owner_relationship: z
-    .enum(["single", "married", "divorced", "widowed", "other"])
-    .optional(),
-  owner_gender: z.enum(["male", "female", "other"]).optional(),
-  owner_email: z.string().email().optional(),
-  is_deleted: z.boolean().optional(),
-  is_blocked: z.boolean().optional(),
+// Zod Validation Schema
+export const userUpdateValidationSchema = z.object({
+  name: z.string().trim().optional(),
+  age: z.number().nullable().optional(),
+  gender: z.enum(['Male', 'Female', 'Other']).nullable().optional(),
+  is_deleted: z.boolean().optional().optional(),
+  is_blocked: z.boolean().optional().optional(),
 });
 
-export type TUserProfile = z.infer<typeof userProfileUpdateValidationSchema>;
+module.exports.userSchemaZod = userUpdateValidationSchema;
+
+export type TUserProfileUpdate = z.infer<typeof userUpdateValidationSchema>;
 
 export type TSignUp = z.infer<typeof userSignupValidationSchema>;

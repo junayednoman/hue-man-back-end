@@ -1,5 +1,6 @@
 import handleAsyncRequest from "../../utils/handleAsyncRequest";
 import { successResponse } from "../../utils/successResponse";
+import { TUserProfile } from "./user.interface";
 import userServices from "./user.service";
 
 const signUp = handleAsyncRequest(async (req, res) => {
@@ -32,8 +33,20 @@ const getSingleUser = handleAsyncRequest(async (req, res) => {
 
 const updateUser = handleAsyncRequest(async (req, res) => {
   const id = req.params.id;
-  const payload = req.body;
   const email = req?.body?.decoded?.email;
+
+  // Handle uploaded file (if any)
+  const imageFile = req.file;
+
+  const image = `uploads/images/${imageFile?.filename}`;
+
+  const textData = JSON.parse(req?.body?.data);
+
+  const payload: Partial<TUserProfile> = {
+    image: imageFile?.filename ? image : undefined,
+    ...textData,
+  };
+
   const result = await userServices.updateUser(id, payload, email);
   successResponse(res, {
     message: "User updated successfully!",

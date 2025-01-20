@@ -48,29 +48,18 @@ const createCards = handleAsyncRequest(async (req, res) => {
 
 const getAllCards = handleAsyncRequest(async (req, res) => {
   const query = req.query;
-  const currentUser = req?.body?.currentUser;
-  const result = await cardServices.getAllCards(query, currentUser);
+  const result = await cardServices.getAllCards(query);
   successResponse(res, {
     message: "Cards retrieved successfully!",
     data: result,
   });
 });
 
-const addNotInterested = handleAsyncRequest(async (req, res) => {
-  const card = req?.body?.cardId;
-  const user = req?.body?.userId;
-  const result = await cardServices.addNotInterested(card, user);
-  successResponse(res, {
-    message: "User added to not interested list successfully!",
-    data: result,
-  });
-});
 
 const cardControllers = {
   createCard,
   createCards,
   getAllCards,
-  addNotInterested,
 };
 
 export default cardControllers;
