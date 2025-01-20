@@ -18,6 +18,4 @@ const deskSchema = new Schema<TDesk>({
   },
 }, { timestamps: true });
 
-const Desk = model<TDesk>('Desk', deskSchema);
-
-module.exports = Desk;
+export const DeskModel = model<TDesk>("DeskCard", deskSchema);
