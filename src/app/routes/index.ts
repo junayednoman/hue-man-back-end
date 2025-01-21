@@ -7,6 +7,7 @@ import cardRouters from "../modules/card/card.routes";
 import deskRoutes from "../modules/desk/desk.routes";
 import storyRouters from "../modules/story/story.routes";
 import faqRouters from "../modules/faq/faq.routes";
+import privacyRoutes from "../modules/privacy/privacy.routes";
 
 const router = Router();
 
@@ -19,6 +20,7 @@ const apiRoutes = [
   { path: "/desk-cards", route: deskRoutes },
   { path: "/stories", route: storyRouters },
   { path: "/faqs", route: faqRouters },
+  { path: "/privacy", route: privacyRoutes },
 ];
 
 apiRoutes.forEach((route) => {

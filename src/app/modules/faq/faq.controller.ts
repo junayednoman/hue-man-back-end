@@ -8,6 +8,7 @@ const createFaqs = handleAsyncRequest(async (req, res) => {
   successResponse(res, {
     message: "Faqs created successfully!",
     data: result,
+    status: 201,
   });
 });
 
