@@ -9,6 +9,8 @@ import storyRouters from "../modules/story/story.routes";
 import faqRouters from "../modules/faq/faq.routes";
 import privacyRoutes from "../modules/privacy/privacy.routes";
 import termsRoutes from "../modules/terms/terms.routes";
+import { subscriptionRoutes } from "../modules/subscription/subscription.routes";
+import { packagesRoutes } from "../modules/packages/packages.routes";
 
 const router = Router();
 
@@ -23,6 +25,8 @@ const apiRoutes = [
   { path: "/faqs", route: faqRouters },
   { path: "/privacy", route: privacyRoutes },
   { path: "/terms", route: termsRoutes },
+  { path: "/subscriptions", route: subscriptionRoutes },
+  { path: "/packages", route: packagesRoutes },
 ];
 
 apiRoutes.forEach((route) => {

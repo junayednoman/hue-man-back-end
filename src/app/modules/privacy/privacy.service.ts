@@ -3,6 +3,7 @@ import { PrivacyModel } from "./privacy.model";
 
 const createPrivacy = async (payload: TPrivacy) => {
   const privacy = await PrivacyModel.findOne({});
+  
   if (privacy) throw new Error("Privacy already exists");
   const result = await PrivacyModel.create(payload);
   return result;
