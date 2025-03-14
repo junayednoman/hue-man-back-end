@@ -2,13 +2,18 @@ import QueryBuilder from "../../classes/queryBuilder";
 import { TStory } from "./story.interface";
 import { StoryModel } from "./story.model";
 
+const createStory = async (payload: TStory) => {
+  const result = await StoryModel.create(payload);
+  return result;
+};
+
 const createStories = async (payload: TStory[]) => {
   const result = await StoryModel.insertMany(payload);
   return result;
 };
 
 const getAllStories = async (query: Record<string, any>) => {
-  const searchableFields = ["name"];
+  const searchableFields = ["text"];
 
   const storyQuery = new QueryBuilder(
     StoryModel.find(),
@@ -25,4 +30,4 @@ const getAllStories = async (query: Record<string, any>) => {
   return { data: result, meta };
 }
 
-export const storyServices = { createStories, getAllStories };
+export const storyServices = { createStories, getAllStories, createStory };

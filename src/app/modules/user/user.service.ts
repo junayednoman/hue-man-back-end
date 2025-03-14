@@ -39,12 +39,12 @@ const signUp = async (payload: TSignUp) => {
       Number(config.salt_rounds)
     );
 
-    const otp_expires = new Date(Date.now() + 7 * 60 * 1000);
+    const otp_expires = new Date(Date.now() + 3 * 60 * 1000);
     const subject = `Your OTP Code is Here - Hue-Man Expressions`;
     const htmlMarkup = `<p>Hi,</p>
   <p>Please use the following One-Time Password (OTP) to verify your account:</p>
   <h2 style="color: #2e6c80;">${otp}</h2>
-  <p>This OTP is valid for 7 minutes. If you did not request this, please ignore this email or contact our support team.</p>
+  <p>This OTP is valid for 3 minutes. If you did not request this, please ignore this email or contact our support team.</p>
   <p>Thank you,</p>
   <p>Hue-Man Expressions</p>`;
 
@@ -114,14 +114,15 @@ const getSingleUser = async (id: string) => {
 };
 
 const updateUser = async (
-  id: string,
+  email: string,
   payload: Partial<TUserProfile>,
-  userEmail: string
 ) => {
-  const user = await UserModel.findById(id);
-  if (!user) throw new AppError(404, "User not found");
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
 
-  if (userEmail && userEmail !== user.email) {
+  if (email && email !== user.email) {
     throw new AppError(403, "Forbidden");
   }
 

@@ -66,17 +66,17 @@ const createAdmin = async () => {
 
 createAdmin();
 
-// process.on("unhandledRejection", () => {
-//   console.log(`unhandledRejection is detected, server shutting down... 😞`);
-//   if (server) {
-//     server.close(() => {
-//       process.exit(1);
-//     });
-//   }
-//   process.exit(1);
-// });
+process.on("unhandledRejection", () => {
+  console.log(`unhandledRejection is detected, server shutting down... 😞`);
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+  process.exit(1);
+});
 
-// process.on("uncaughtException", () => {
-//   console.log(`uncaughtException is detected, server shutting down... 😞`);
-//   process.exit();
-// });
+process.on("uncaughtException", () => {
+  console.log(`uncaughtException is detected, server shutting down... 😞`);
+  process.exit();
+});

@@ -44,6 +44,7 @@ export const upload = multer({
 // Export single file upload handlers
 export const uploadSingleImage = upload.single("image"); // For uploading a single image
 export const uploadSingleAudio = upload.single("audio"); // For uploading a single audio file
+export const uploadMultipleIMages = upload.array("images", 6);
 export const uploadImageAndAudio = upload.fields([
   { name: "image", maxCount: 1 }, // Single image field
   { name: "story", maxCount: 10 }, // Single image field

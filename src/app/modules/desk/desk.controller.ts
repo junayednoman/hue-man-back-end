@@ -12,8 +12,8 @@ const addToDesk = handleAsyncRequest(async (req, res) => {
   });
 });
 
-const getAllDeskCards = handleAsyncRequest(async (req, res) => {
-  const id = req?.body?.decoded?.id;
+const getAllDeskCards = handleAsyncRequest(async (req: any, res) => {
+  const id = req?.user?.id;
   const result = await deskServices.getAllDeskCards(id);
   successResponse(res, {
     message: "Cards retrieved from desk successfully!",
@@ -21,9 +21,9 @@ const getAllDeskCards = handleAsyncRequest(async (req, res) => {
   });
 });
 
-const removeFromDesk = handleAsyncRequest(async (req, res) => {
+const removeFromDesk = handleAsyncRequest(async (req: any, res) => {
   const id = req.params.id;
-  const userId = req?.body?.decoded?.id;
+  const userId = req?.user?.id;
   const result = await deskServices.removeFromDesk(id, userId);
   successResponse(res, {
     message: "Card deleted from desk successfully!",
@@ -31,9 +31,9 @@ const removeFromDesk = handleAsyncRequest(async (req, res) => {
   });
 });
 
-const changeIndex = handleAsyncRequest(async (req, res) => {
+const changeIndex = handleAsyncRequest(async (req: any, res) => {
   const id = req.params.id;
-  const userId = req?.body?.decoded?.id;
+  const userId = req?.user?.id;
   const index = req.body.index;
   const result = await deskServices.changeIndex(id, index, userId);
   successResponse(res, {

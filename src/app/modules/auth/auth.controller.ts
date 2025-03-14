@@ -53,12 +53,27 @@ const resetForgottenPassword = handleAsyncRequest(async (req, res) => {
   });
 });
 
-const createNewPassword = handleAsyncRequest(async (req, res) => {
+const createNewPassword = handleAsyncRequest(async (req: any, res) => {
+  const email = req.user.email
   const payload = req.body;
-  const result = await AuthServices.createNewPassword(payload);
+  const result = await AuthServices.createNewPassword(email, payload);
+
+  // set refreshToken in cookie
+  const day = 24 * 60 * 60 * 1000
+  const { refreshToken, accessToken } = result;
+  const cookieOptions: any = {
+    httpOnly: true,
+    secure: config.node_env === 'production', // Use secure in production
+    maxAge: 3 * day,
+  };
+
+  if (config.node_env === 'production') cookieOptions.sameSite = 'none';
+
+  res.cookie('refreshToken', refreshToken, cookieOptions);
+
   successResponse(res, {
     message: "New password created successfully!",
-    data: result,
+    data: { accessToken },
   });
 });
 

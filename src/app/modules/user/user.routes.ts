@@ -12,7 +12,7 @@ userRouters.get(
   userControllers.getSingleUser
 );
 userRouters.put(
-  "/:id",
+  "/",
   authVerify(["admin", "user"]),
   uploadSingleImage,
   userControllers.updateUser

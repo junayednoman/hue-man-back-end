@@ -31,14 +31,13 @@ const getSingleUser = handleAsyncRequest(async (req, res) => {
   });
 });
 
-const updateUser = handleAsyncRequest(async (req, res) => {
-  const id = req.params.id;
-  const email = req?.body?.decoded?.email;
+const updateUser = handleAsyncRequest(async (req: any, res) => {
+  const email = req?.user?.email;
 
   // Handle uploaded file (if any)
   const imageFile = req.file;
 
-  const image = `uploads/images/${imageFile?.filename}`;
+  const image = `/images/${imageFile?.filename}`;
 
   const textData = JSON.parse(req?.body?.data);
 
@@ -47,16 +46,16 @@ const updateUser = handleAsyncRequest(async (req, res) => {
     ...textData,
   };
 
-  const result = await userServices.updateUser(id, payload, email);
+  const result = await userServices.updateUser(email, payload);
   successResponse(res, {
     message: "User updated successfully!",
     data: result,
   });
 });
 
-const deleteUser = handleAsyncRequest(async (req, res) => {
+const deleteUser = handleAsyncRequest(async (req: any, res) => {
   const id = req.params.id;
-  const email = req?.body?.decoded?.email;
+  const email = req?.user?.email;
   const result = await userServices.deleteUser(id, email);
   successResponse(res, {
     message: "User deleted successfully!",

@@ -27,9 +27,11 @@ const authVerify = (allowedRoles: string[]) =>
       if (user.role !== decoded.role || !allowedRoles.includes(decoded?.role)) {
         throw new AppError(403, "Forbidden");
       }
-      if (decoded.role === "user") {
-        req.body.decoded = decoded;
-      }
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      req.user = decoded;
+
       next();
     }
   );

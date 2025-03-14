@@ -15,7 +15,7 @@ const createCard = handleAsyncRequest(async (req, res) => {
   if (!imageName) throw new AppError(400, "Please provide an image file");
   if (!audioName) throw new AppError(400, "Please provide an audio file");
 
-  const image = `uploads/images/${imageName}`;
+  const image = `${imageName}`;
   const audio = `uploads/audio/${audioName}`;
 
   const textData = JSON.parse(req?.body?.data);

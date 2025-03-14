@@ -16,7 +16,7 @@ const createCategory = handleAsyncRequest(async (req, res) => {
     throw new AppError(400, "Please provide an image file");
   }
 
-  const image = `uploads/images/${imageFile.filename}`;
+  const image = `/images/${imageFile.filename}`;
   const textData = JSON.parse(req?.body?.data);
   const payload = {
     image,
@@ -67,7 +67,7 @@ const updateCategory = handleAsyncRequest(async (req, res) => {
   // Handle uploaded file (if any)
   const imageFile = req.file;
 
-  const image = imageFile && `uploads/images/${imageFile?.filename}`;
+  const image = imageFile && `/images/${imageFile?.filename}`;
   const textData = JSON.parse(req?.body?.data);
   const payload = {
     image,

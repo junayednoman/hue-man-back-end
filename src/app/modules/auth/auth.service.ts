@@ -50,14 +50,14 @@ const sendOtp = async (payload: { email: string }) => {
   );
 
   // prepare email content
-  const otp_expires = new Date(Date.now() + 7 * 60 * 1000);
-  const subject = `Your OTP Code is Here - TAILSDATE`;
+  const otp_expires = new Date(Date.now() + 3 * 60 * 1000);
+  const subject = `Your OTP Code is Here - Hue-man Expressions`;
   const htmlMarkup = `<p>Hi,</p>
   <p>Please use the following One-Time Password (OTP) to verify your email address:</p>
   <h2 style="color: #2e6c80;">${otp}</h2>
-  <p>This OTP is valid for 7 minutes. If you did not request this, please ignore this email or contact our support team.</p>
+  <p>This OTP is valid for 3 minutes. If you did not request this, please ignore this email or contact our support team.</p>
   <p>Thank you,</p>
-  <p>TAILSDATE</p>`;
+  <p>Hue-man Expressions</p>`;
 
   sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
 
@@ -66,13 +66,13 @@ const sendOtp = async (payload: { email: string }) => {
     { otp: hashedOtp, otp_expires, otp_attempts: 0 },
     { new: true }
   );
-  return { otp };
+  return { email: payload.email }
 };
 
 const verifyOtp = async (payload: {
   email: string;
   otp: string;
-  verify_email?: boolean;
+  verify_account?: boolean;
 }) => {
   const user = await isUserExist(payload.email);
 
@@ -98,21 +98,23 @@ const verifyOtp = async (payload: {
     throw new AppError(StatusCodes.BAD_REQUEST, "OTP has expired", "otp");
   }
 
-  if (payload.verify_email) {
-    const subject = `Your Email Has Been Successfully Verified - SCOUTSTREAM`;
+  // send email if user account is verified
+  if (payload.verify_account) {
+    const subject = `Your Email Has Been Successfully Verified - Hue-man Expressions`;
     const htmlMarkup = `<p>Hi,</p>
     <p>Congratulations! Your email address has been successfully verified.</p>
     <p>You can now enjoy all the features of your account without any restrictions.</p>
     <p>If you have any questions or concerns, please don't hesitate to contact our support team.</p>
     <p>Thank you,</p>
-    <p>SCOUTSTREAM</p>`;
+    <p>Hue-man Expressions</p>`;
 
     sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
     return await AuthModel.findByIdAndUpdate(user._id, {
-      is_email_verified: true,
+      is_account_verified: true,
       $unset: { otp: "", otp_expires: "", otp_attempts: "" },
     });
   }
+
   await AuthModel.findByIdAndUpdate(user._id, {
     is_otp_verified: true,
     $unset: { otp: "", otp_expires: "", otp_attempts: "" },
@@ -129,44 +131,34 @@ const resetForgottenPassword = async (payload: {
     throw new AppError(StatusCodes.BAD_REQUEST, "OTP not verified", "otp");
   }
 
-  const subject = `Password Reset Confirmation - TAILSDATE`;
-  const htmlMarkup = `<p>Hi,</p>
-  <p>Your password has been successfully reset. You can now log in to your account using your new password.</p>
-  <p>If you did not request this password reset, please contact our support team immediately.</p>
-  <p>Thank you,</p>
-  <p>TAILSDATE</p>`;
-
-  sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
-
   // hash the password and save the document
   const hashedPassword = await bcrypt.hash(
     payload.password,
     Number(config.salt_rounds)
   );
-  await AuthModel.findByIdAndUpdate(user._id, {
+  const newAuth = await AuthModel.findByIdAndUpdate(user._id, {
     password: hashedPassword,
     $unset: { is_otp_verified: "" },
   });
 
-  // generate token
-  const jwtPayload = {
-    email: user.email,
-    role: user.role,
-    id: user._id,
-  };
+  // send email if password is reset
+  if (newAuth) {
+    const subject = `Password Reset Confirmation - Hue-man Expressions`;
+    const htmlMarkup = `<p>Hi,</p>
+  <p>Your password has been successfully reset. You can now log in to your account using your new password.</p>
+  <p>If you did not request this password reset, please contact our support team immediately.</p>
+  <p>Thank you,</p>
+  <p>Hue-man Expressions</p>`;
 
-  const token = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: config.jwt_access_expiration,
-  });
-  return { token };
+    sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
+  }
 };
 
-const createNewPassword = async (payload: {
-  email: string;
+const createNewPassword = async (email: string, payload: {
   oldPassword: string;
   newPassword: string;
 }) => {
-  const user = await isUserExist(payload.email);
+  const user = await isUserExist(email);
 
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(
@@ -186,6 +178,7 @@ const createNewPassword = async (payload: {
     payload.newPassword,
     Number(config.salt_rounds)
   );
+
   await AuthModel.findByIdAndUpdate(user._id, { password: hashedPassword });
 
   // generate token
@@ -195,10 +188,14 @@ const createNewPassword = async (payload: {
     id: user._id,
   };
 
-  const token = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
+  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
     expiresIn: config.jwt_access_expiration,
   });
-  return { token };
+
+  const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
+    expiresIn: "3d",
+  });
+  return { accessToken, refreshToken, role: user.role };
 };
 
 const AuthServices = {
