@@ -8,8 +8,10 @@ import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
 
-const loginUser = async (payload: { email: string; password: string }) => {
+const loginUser = async (payload: { email: string; password: string, is_remember?: boolean }) => {
   const user = await isUserExist(payload.email);
+
+  if (!user.is_account_verified) throw new AppError(StatusCodes.BAD_REQUEST, "Account not verified");
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(payload.password, user.password);
   if (!isPasswordMatch) {
@@ -27,10 +29,14 @@ const loginUser = async (payload: { email: string; password: string }) => {
     id: user._id,
   };
 
-  const token = jsonwebtoken.sign(jwtPayload, config.jwt_secret as string, {
-    expiresIn: config.jwt_expiration,
+  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
+    expiresIn: config.jwt_access_expiration,
   });
-  return { token };
+
+  const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
+    expiresIn: payload?.is_remember ? "30d" : "3d",
+  });
+  return { accessToken, refreshToken, role: user.role };
 };
 
 const sendOtp = async (payload: { email: string }) => {
@@ -42,6 +48,8 @@ const sendOtp = async (payload: { email: string }) => {
     otp.toString(),
     Number(config.salt_rounds)
   );
+
+  // prepare email content
   const otp_expires = new Date(Date.now() + 7 * 60 * 1000);
   const subject = `Your OTP Code is Here - TAILSDATE`;
   const htmlMarkup = `<p>Hi,</p>
@@ -147,8 +155,8 @@ const resetForgottenPassword = async (payload: {
     id: user._id,
   };
 
-  const token = jsonwebtoken.sign(jwtPayload, config.jwt_secret as string, {
-    expiresIn: config.jwt_expiration,
+  const token = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
+    expiresIn: config.jwt_access_expiration,
   });
   return { token };
 };
@@ -187,8 +195,8 @@ const createNewPassword = async (payload: {
     id: user._id,
   };
 
-  const token = jsonwebtoken.sign(jwtPayload, config.jwt_secret as string, {
-    expiresIn: config.jwt_expiration,
+  const token = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
+    expiresIn: config.jwt_access_expiration,
   });
   return { token };
 };

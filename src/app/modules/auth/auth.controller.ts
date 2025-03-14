@@ -1,13 +1,30 @@
+import config from "../../config";
 import handleAsyncRequest from "../../utils/handleAsyncRequest";
 import { successResponse } from "../../utils/successResponse";
 import AuthServices from "./auth.service";
 
 const loginUser = handleAsyncRequest(async (req, res) => {
   const payload = req.body;
+
   const result = await AuthServices.loginUser(payload);
+  // set refreshToken in cookie
+  const day = 24 * 60 * 60 * 1000
+  const { refreshToken, accessToken } = result;
+
+  // set refreshToken in cookie
+  const cookieOptions: any = {
+    httpOnly: true,
+    secure: config.node_env === 'production', // Use secure in production
+    maxAge: payload.isRememberMe ? 30 * day : 3 * day,
+  };
+
+  if (config.node_env === 'production') cookieOptions.sameSite = 'none';
+
+  res.cookie('refreshToken', refreshToken, cookieOptions);
+
   successResponse(res, {
     message: "User logged in successfully!",
-    data: result,
+    data: { accessToken },
   });
 });
 

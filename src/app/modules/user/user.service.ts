@@ -5,57 +5,68 @@ import AuthModel from "../auth/auth.model";
 import config from "../../config";
 import { TSignUp } from "./user.validation";
 import bcrypt from "bcrypt";
-import jsonwebtoken from "jsonwebtoken";
 import QueryBuilder from "../../classes/queryBuilder";
 import { TUserProfile } from "./user.interface";
 import { deleteFile } from "../../utils/deleteFile";
 import { defaultProfileImg } from "../../constants/global.constant";
+import generateOTP from "../../utils/generateOTP";
+import { sendEmail } from "../../utils/sendEmail";
 
 const signUp = async (payload: TSignUp) => {
   // check if user exists
-  const auth = await AuthModel.findOne({ email: payload.email });
-  const user = await UserModel.findOne({ email: payload.email });
-  if (auth && user) {
+  const auth = await AuthModel.findOne({ email: payload.email, is_account_verified: true });
+  if (auth) {
     throw new AppError(400, "User already exists");
   }
+
   const session = await mongoose.startSession();
 
   try {
+    const { password, ...userData } = payload;
     session.startTransaction();
     // Create auth data
     const hashedPassword = await bcrypt.hash(
-      payload.password,
+      password,
       Number(config.salt_rounds)
     );
+
+
+
+    // generate OTP and send email
+    const otp = generateOTP();
+    const hashedOtp = await bcrypt.hash(
+      otp.toString(),
+      Number(config.salt_rounds)
+    );
+
+    const otp_expires = new Date(Date.now() + 7 * 60 * 1000);
+    const subject = `Your OTP Code is Here - Hue-Man Expressions`;
+    const htmlMarkup = `<p>Hi,</p>
+  <p>Please use the following One-Time Password (OTP) to verify your account:</p>
+  <h2 style="color: #2e6c80;">${otp}</h2>
+  <p>This OTP is valid for 7 minutes. If you did not request this, please ignore this email or contact our support team.</p>
+  <p>Thank you,</p>
+  <p>Hue-Man Expressions</p>`;
+
     const authData = {
       email: payload.email,
       password: hashedPassword,
-    };
+      otp: hashedOtp,
+      otp_expires,
+      otp_attempts: 0,
+    } as any;
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    delete payload.password;
+    const newUser = await UserModel.findOneAndUpdate({ email: payload.email }, userData, { session, upsert: true, new: true });
 
-    const newAuth = await AuthModel.create([authData], { session });
-    const userData = {
-      name: payload.name,
-      email: payload.email,
-    };
-    const newUser = await UserModel.create([userData], { session });
+    authData.user = newUser?._id
+    await AuthModel.findOneAndUpdate({ email: payload.email }, authData, { session, upsert: true, new: true });
 
-    // generate token
-    const jwtPayload = {
-      email: payload.email,
-      role: "user",
-      id: newAuth[0]?._id,
-    };
-    const token = await jsonwebtoken.sign(
-      jwtPayload,
-      config.jwt_secret as string,
-      { expiresIn: config.jwt_expiration }
-    );
+    if (newUser) {
+      sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
+    }
+
     await session.commitTransaction();
-    return { token, user: newUser[0] };
+    return newUser;
   } catch (error: any) {
     await session.abortTransaction();
     throw new AppError(500, error.message || "Error creating athlete");
@@ -86,7 +97,7 @@ const getAllUsers = async (query: Record<string, any>) => {
     .selectFields();
 
   const meta = await userQuery.countTotal();
-  const result = await userQuery.queryModel;
+  const result = await userQuery.queryModel.populate("user");
   return { data: result, meta };
 };
 

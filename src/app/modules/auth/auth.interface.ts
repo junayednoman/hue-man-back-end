@@ -1,8 +1,11 @@
+import { ObjectId } from "mongoose";
+
 export type TAuth = {
   email: string;
   password: string;
+  user: ObjectId;
   role: "user" | "admin";
-  is_email_verified: boolean;
+  is_account_verified: boolean;
   otp?: string;
   otp_expires?: Date;
   otp_attempts: number;
