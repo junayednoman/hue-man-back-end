@@ -11,6 +11,7 @@ import privacyRoutes from "../modules/privacy/privacy.routes";
 import termsRoutes from "../modules/terms/terms.routes";
 import { subscriptionRoutes } from "../modules/subscription/subscription.routes";
 import { packagesRoutes } from "../modules/packages/packages.routes";
+import customVoiceRouters from "../modules/customVoice/customVoice.routes";
 
 const router = Router();
 
@@ -27,6 +28,7 @@ const apiRoutes = [
   { path: "/terms", route: termsRoutes },
   { path: "/subscriptions", route: subscriptionRoutes },
   { path: "/packages", route: packagesRoutes },
+  { path: "/custom-voices", route: customVoiceRouters },
 ];
 
 apiRoutes.forEach((route) => {

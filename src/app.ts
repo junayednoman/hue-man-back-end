@@ -11,7 +11,7 @@ app.use(express.json());
 app.use("/api/v1", router);
 
 app.get("/", (req, res) => {
-  res.json({ message: "Hello Developer!" });
+  res.json({ message: "Hue-man Server is running!" });
 });
 
 // Serve static files from the 'uploads' directory

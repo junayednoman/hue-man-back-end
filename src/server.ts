@@ -10,8 +10,8 @@ let server: Server;
 async function main() {
   try {
     await mongoose.connect(config.database_url as string);
-    server = app.listen(config.port, () => {
-      console.log("🚀 Server is running on port: 5000");
+    server = app.listen(Number(config.port), config.ip as string, () => {
+      console.log(`🚀 Hue-man Server is running on port: ${config.port}`);
     });
   } catch (error) {
     console.log("server error:", error);
