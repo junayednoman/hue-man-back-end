@@ -10,6 +10,7 @@ import {
 import AuthController from "./auth.controller";
 import { userSignupValidationSchema } from "../user/user.validation";
 import userControllers from "../user/user.controller";
+import authVerify from "../../middlewares/authVerify";
 
 const authRouters = Router();
 authRouters.post(
@@ -41,6 +42,11 @@ authRouters.post(
   "/create-new-password",
   handleZodValidation(createNewPasswordValidationSchema),
   AuthController.createNewPassword
+);
+authRouters.get(
+  "/sub-accounts",
+  authVerify(["user"]),
+  AuthController.getSubAccounts
 );
 
 export default authRouters;

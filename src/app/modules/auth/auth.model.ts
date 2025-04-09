@@ -11,6 +11,7 @@ const userSchema = new Schema<TAuth>(
     },
     password: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    parent_id: { type: Schema.Types.ObjectId, ref: "Auth", default: null },
     role: {
       type: String,
       enum: ["user", "admin"],

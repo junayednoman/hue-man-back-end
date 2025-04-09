@@ -5,6 +5,7 @@ export type TAuth = {
   password: string;
   user: ObjectId;
   role: "user" | "admin";
+  parent_id?: ObjectId;
   is_account_verified: boolean;
   otp?: string;
   otp_expires?: Date;

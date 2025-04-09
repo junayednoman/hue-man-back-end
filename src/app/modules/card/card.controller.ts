@@ -55,11 +55,22 @@ const getAllCards = handleAsyncRequest(async (req, res) => {
   });
 });
 
+const getSingleCard = handleAsyncRequest(async (req: any, res) => {
+  const id = req.params.id;
+  const userId = req.user.id
+  const result = await cardServices.getSingleCard(id, userId);
+  successResponse(res, {
+    message: "Card retrieved successfully!",
+    data: result,
+  });
+});
+
 
 const cardControllers = {
   createCard,
   createCards,
   getAllCards,
+  getSingleCard
 };
 
 export default cardControllers;

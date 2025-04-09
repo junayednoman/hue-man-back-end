@@ -198,12 +198,18 @@ const createNewPassword = async (email: string, payload: {
   return { accessToken, refreshToken, role: user.role };
 };
 
+const getSubAccounts = async (userId: string) => {
+  const subAccounts = await AuthModel.find({ parent_id: userId });
+  return subAccounts
+}
+
 const AuthServices = {
   loginUser,
   sendOtp,
   verifyOtp,
   resetForgottenPassword,
   createNewPassword,
+  getSubAccounts
 };
 
 export default AuthServices;

@@ -3,6 +3,7 @@ import QueryBuilder from "../../classes/queryBuilder";
 import { deleteFile } from "../../utils/deleteFile";
 import AuthModel from "../auth/auth.model";
 import CategoryModel from "../category/category.model";
+import CustomVoice from "../customVoice/customVoice.model";
 import { TCard } from "./card.interface";
 import CardModel from "./card.model";
 
@@ -58,10 +59,20 @@ const getAllCards = async (query: Record<string, any>) => {
   return { data: result, meta };
 };
 
+const getSingleCard = async (id: string, userId: string) => {
+  const card = await CardModel.findById(id);
+  const customVoice = await CustomVoice.findOne({ user: userId, card: id });
+  if (card && customVoice) {
+    card.audio = customVoice.voice;
+  }
+  return card;
+}
+
 const cardServices = {
   createCard,
   getAllCards,
-  createCards
+  createCards,
+  getSingleCard
 };
 
 export default cardServices;

@@ -77,12 +77,23 @@ const createNewPassword = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
+const getSubAccounts = handleAsyncRequest(async (req: any, res) => {
+  const id = req?.user?.id;
+  const result = await AuthServices.getSubAccounts(id);
+
+  successResponse(res, {
+    message: "Sub accounts retrieved successfully!",
+    data: result,
+  });
+});
+
 const AuthController = {
   loginUser,
   sendOtp,
   verifyOtp,
   resetForgottenPassword,
   createNewPassword,
+  getSubAccounts
 };
 
 export default AuthController;

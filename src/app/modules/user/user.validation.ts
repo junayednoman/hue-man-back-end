@@ -11,6 +11,7 @@ export const userSignupValidationSchema = z.object({
     .string()
     .nonempty("Password is required")
     .min(7, "Password must be at least 7 characters long"),
+  parent_id: z.string().optional(),
 });
 
 // Zod Validation Schema
