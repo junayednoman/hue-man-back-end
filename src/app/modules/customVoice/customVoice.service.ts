@@ -10,8 +10,17 @@ const addVoice = async (userId: string, payload: TVoice) => {
   if (!card) throw new AppError(404, "Invalid card ID");
 
   payload.user = userId as unknown as ObjectId;
-  const voice = await CustomVoice.findOneAndUpdate({ user: userId, card: payload.card }, payload, { upsert: true, new: true });
-  return voice;
+
+  const voice = await CustomVoice.findOne({ user: userId, card: payload.card });
+  if (voice) {
+    await deleteFile(voice.voice);
+    const result = await CustomVoice.findByIdAndUpdate(voice._id, { voice: payload.voice }, { new: true });
+    return result;
+  } else {
+    const result = await CustomVoice.create(payload);
+    return result;
+  }
+
 }
 
 const getVoice = async (userId: string, cardId: string) => {

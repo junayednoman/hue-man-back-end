@@ -10,12 +10,12 @@ const addVoice = handleAsyncRequest(async (req: any, res) => {
   const audioName = file.filename;
   if (!audioName) throw new AppError(400, "Please provide an audio file");
 
-  const audio = `uploads/audio/${audioName}`;
+  const voice = `uploads/audio/${audioName}`;
 
   const textData = JSON.parse(req?.body?.data);
 
   const payload = {
-    audio,
+    voice,
     ...textData,
   };
 
