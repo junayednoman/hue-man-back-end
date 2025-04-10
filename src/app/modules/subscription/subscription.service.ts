@@ -1,57 +1,95 @@
-import mongoose, { ObjectId } from "mongoose";
-import { SubscriptionModel } from "./subscription.model";
-import { PaymentModel } from "../payment/payment.model";
-import UserModel from "../user/user.model";
+import mongoose from "mongoose";
+import QueryBuilder from "../../classes/queryBuilder";
 import { generateTransactionId } from "../../utils/transactionIdGenerator";
+import User from "../user/user.model";
+import Subscription from "./subscription.model";
+import Payment from "../payment/payment.model";
+import { AppError } from "../../classes/appError";
 
-const createOrUpdateSubscription = async (email: string, payload: { package_name: 'monthly' | 'yearly', amount: number }) => {
-  const session = await mongoose.startSession();
-
-  const user = await UserModel.findOne({ email, is_blocked: false, is_deleted: false });
-
-  if (!user) throw new Error('User not found');
-
-  // prepare payment data
-  const transaction_id = generateTransactionId();
+const createOrUpdateSubscription = async (userId: string, amount: number, package_name: "monthly" | "yearly") => {
+  const transaction_id = generateTransactionId()
   const paymentData = {
-    user: user?._id as unknown as ObjectId,
-    amount: payload.amount,
-    payment_date: new Date(),
+    user: userId,
+    amount,
     transaction_id,
-  };
+    status: "paid",
+    currency: "USD"
+  }
+
+  const duration = package_name === "monthly" ? 1 : 12;
+  const start_date = new Date();
+  let end_date = new Date(start_date);
+  end_date.setMonth(start_date.getMonth() + duration);
+
+  const subscription = await Subscription.findOne({ user: userId });
+
+  if (subscription) {
+    const previous_end_date = subscription.end_date;
+    const monthsRemaining = Math.max(0, (previous_end_date.getFullYear() - start_date.getFullYear()) * 12 + previous_end_date.getMonth() - start_date.getMonth());
+    end_date = new Date(start_date);
+    end_date.setMonth(start_date.getMonth() + monthsRemaining + duration);
+  }
 
   const subscriptionData = {
-    user: user?._id as unknown as ObjectId,
-    package_name: payload.package_name,
-    start_date: new Date(),
-    end_date: new Date(new Date().setMonth(new Date().getMonth() + (payload.package_name === 'monthly' ? 1 : 12))),
-    remaining_messages: 100,
-  };
+    user: userId,
+    plan: package_name,
+    start_date,
+    end_date,
+    status: "active",
+  }
 
-  const subscription = await SubscriptionModel.findOne({ user: user?._id });
+  const session = await mongoose.startSession();
 
   try {
-   session.startTransaction();
-
-    if (subscription) {
-      subscriptionData.remaining_messages = subscription.remaining_messages + 100;
-      await SubscriptionModel.findByIdAndUpdate(subscription._id, subscriptionData, { session });
-    }
-
-    await PaymentModel.create([paymentData], { session });
+    session.startTransaction();
+    await Subscription.findOneAndUpdate({ user: userId }, subscriptionData, { session, upsert: true });
+    await Payment.create([paymentData], { session });
 
     await session.commitTransaction();
-    return result;
-  }
-  catch (err) {
+  } catch (error: any) {
     await session.abortTransaction();
-    throw err;
+    throw new AppError(500, error.message || "Error verifying payment");
   } finally {
-    session.endSession()
+    session.endSession();
   }
 }
 
+const getAllSubscriptions = async (query: Record<string, any>) => {
+  const searchableFields = [
+    "name",
+    "email"
+  ];
+  const userQuery = new QueryBuilder(
+    Subscription.find(),
+    query
+  )
+    .search(searchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .selectFields();
 
-export const subscriptionServices = {
+  const meta = await userQuery.countTotal();
+  const result = await userQuery.queryModel.populate("user", "name email").populate("plan", "name");
+  return { data: result, meta };
+};
+
+const getSingleSubscription = async (id: string) => {
+  const result = await Subscription.findById(id).populate("user", "name email").populate("plan", "name");
+  return result;
+};
+
+const getMySubscription = async (email: string) => {
+  const user = await User.findOne({ email, is_blocked: false, is_deleted: false });
+  const result = await Subscription.findOne({ user: user?._id, status: "active" });
+  return result;
+};
+
+const subscriptionServices = {
   createOrUpdateSubscription,
-}
+  getAllSubscriptions,
+  getSingleSubscription,
+  getMySubscription
+};
+
+export default subscriptionServices;

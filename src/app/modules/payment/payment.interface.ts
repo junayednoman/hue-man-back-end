@@ -1,10 +1,10 @@
-import { ObjectId } from "mongoose";
+import { ObjectId } from 'mongoose';
 
 export interface TPayment {
   user: ObjectId;
-  transaction_id: string;
   amount: number;
-  payment_date: Date;
-  payment_status: 'paid' | 'failed' | 'pending';
+  transaction_id: string;
+  status: string;
   currency: string;
+  purpose: "subscription" | "star";
 }

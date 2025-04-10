@@ -9,9 +9,10 @@ import storyRouters from "../modules/story/story.routes";
 import faqRouters from "../modules/faq/faq.routes";
 import privacyRoutes from "../modules/privacy/privacy.routes";
 import termsRoutes from "../modules/terms/terms.routes";
-import { subscriptionRoutes } from "../modules/subscription/subscription.routes";
 import { packagesRoutes } from "../modules/packages/packages.routes";
 import customVoiceRouters from "../modules/customVoice/customVoice.routes";
+import subscriptionRouters from "../modules/subscription/subscription.routes";
+import paymentRouters from "../modules/payment/payment.routes";
 
 const router = Router();
 
@@ -26,7 +27,8 @@ const apiRoutes = [
   { path: "/faqs", route: faqRouters },
   { path: "/privacy", route: privacyRoutes },
   { path: "/terms", route: termsRoutes },
-  { path: "/subscriptions", route: subscriptionRoutes },
+  { path: "/subscriptions", route: subscriptionRouters },
+  { path: "/payments", route: paymentRouters },
   { path: "/packages", route: packagesRoutes },
   { path: "/custom-voices", route: customVoiceRouters },
 ];

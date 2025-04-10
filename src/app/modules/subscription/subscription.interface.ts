@@ -1,10 +1,9 @@
 import { ObjectId } from 'mongoose';
 
-export interface TSubscription {
+export type TSubscription = {
   user: ObjectId;
-  package_name: 'monthly' | 'yearly';
+  plan: ObjectId;
   start_date: Date;
   end_date: Date;
   status: 'active' | 'canceled' | 'expired';
-  remaining_messages: number;
-}
+};

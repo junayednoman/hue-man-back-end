@@ -1,25 +1,14 @@
-import { Router } from 'express';
-import express from 'express';
-import {
-  paymentController,
-   
-  subscriptionController,
-} from './subscription.controller';
-import authVerify from '../../middlewares/authVerify';
+import { Router } from "express";
+import authVerify from "../../middlewares/authVerify";
+import subscriptionControllers from "./subscription.controller";
+import { handleZodValidation } from "../../middlewares/handleZodValidation";
+import { subscriptionValidationSchema } from "./subscription.validation";
 
-export const subscriptionRoutes = Router();
+const subscriptionRouters = Router();
 
-subscriptionRoutes.post(
-  '/',
-  express.raw({ type: 'application/json' }),
-  subscriptionController.manageSubscriptions,
-);
+subscriptionRouters.post("/", authVerify(["user"]), handleZodValidation(subscriptionValidationSchema), subscriptionControllers.createOrUpdateSubscription);
+subscriptionRouters.get('/', authVerify(["admin"]), subscriptionControllers.getAllSubscriptions);
+subscriptionRouters.get('/my', authVerify(["user"]), subscriptionControllers.getMySubscription);
+subscriptionRouters.get('/:id', authVerify(["admin"]), subscriptionControllers.getSingleSubscription);
 
-// payment routes
-export const paymentRoutes = Router();
-paymentRoutes.get('/', authVerify(['admin']), paymentController.getPayments);
-paymentRoutes.get(
-  '/:id',
-  authVerify(['admin']),
-  paymentController.getSinglePayment,
-);
+export default subscriptionRouters;
