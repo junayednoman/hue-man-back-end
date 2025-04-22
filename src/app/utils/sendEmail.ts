@@ -15,6 +15,9 @@ export const sendEmail = async (
       user: config.sender_email,
       pass: config.sender_app_pass,
     },
+    tls: {
+      rejectUnauthorized: config.node_env === 'production', // Temporarily disable certificate validation (only for development)
+    }
   })
 
   await transporter.sendMail({
