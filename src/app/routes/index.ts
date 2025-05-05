@@ -13,6 +13,7 @@ import { packagesRoutes } from "../modules/packages/packages.routes";
 import customVoiceRouters from "../modules/customVoice/customVoice.routes";
 import subscriptionRouters from "../modules/subscription/subscription.routes";
 import paymentRouters from "../modules/payment/payment.routes";
+import applicationRouters from "../modules/application/application.routes";
 
 const router = Router();
 
@@ -31,6 +32,7 @@ const apiRoutes = [
   { path: "/payments", route: paymentRouters },
   { path: "/packages", route: packagesRoutes },
   { path: "/custom-voices", route: customVoiceRouters },
+  { path: "/applications", route: applicationRouters },
 ];
 
 apiRoutes.forEach((route) => {
