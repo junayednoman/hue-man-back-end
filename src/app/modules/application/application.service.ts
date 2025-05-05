@@ -23,7 +23,6 @@ const getApplications = async () => {
 
 const getApplication = async (id: string) => {
   const result = await ApplicationModel.findById(id);
-  console.log('result', id);
   return result;
 }
 

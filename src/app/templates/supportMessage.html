@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support Email</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #ff7f00;
+        font-size: 24px;
+      }
+      .email-content {
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .email-content p {
+        margin-bottom: 10px;
+      }
+      .footer {
+        font-size: 14px;
+        color: #777;
+        margin-top: 20px;
+        text-align: center;
+      }
+      .footer a {
+        color: #ff7f00;
+        text-decoration: none;
+      }
+      .contact-info {
+        font-size: 14px;
+        padding: 15px;
+        border-top: 1px solid #f0f0f0;
+        margin-top: 20px;
+      }
+      .contact-info p {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <h1>Support Request Received</h1>
+      <p class="email-content">Hello Support Team,</p>
+      <p class="email-content">
+        A new support request has been submitted through the contact form. Here
+        are the details:
+      </p>
+
+      <table style="width: 100%; margin-top: 20px">
+        <tr>
+          <td><strong>Name:</strong></td>
+          <td>{{full_name}}</td>
+        </tr>
+        <tr>
+          <td><strong>Email Address:</strong></td>
+          <td>{{email_address}}</td>
+        </tr>
+        <tr>
+          <td><strong>Subject:</strong></td>
+          <td>{{subject}}</td>
+        </tr>
+        <tr>
+          <td><strong>Message:</strong></td>
+          <td>{{message}}</td>
+        </tr>
+      </table>
+
+      <div class="contact-info">
+        <p>
+          If you have any questions or need further information, please don't
+          hesitate to contact us at <strong>support@example.com</strong>
+        </p>
+        <p>Best regards,</p>
+        <p><strong>Your Support Team</strong></p>
+      </div>
+
+      <div class="footer">
+        <p>&copy; 2025 Your Company. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>

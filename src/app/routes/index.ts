@@ -14,6 +14,7 @@ import customVoiceRouters from "../modules/customVoice/customVoice.routes";
 import subscriptionRouters from "../modules/subscription/subscription.routes";
 import paymentRouters from "../modules/payment/payment.routes";
 import applicationRouters from "../modules/application/application.routes";
+import supportMessageRouters from "../modules/support/support.routes";
 
 const router = Router();
 
@@ -33,6 +34,7 @@ const apiRoutes = [
   { path: "/packages", route: packagesRoutes },
   { path: "/custom-voices", route: customVoiceRouters },
   { path: "/applications", route: applicationRouters },
+  { path: "/support-messages", route: supportMessageRouters },
 ];
 
 apiRoutes.forEach((route) => {
