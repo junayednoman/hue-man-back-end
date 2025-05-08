@@ -3,9 +3,10 @@ import { TPackage } from './packages.interface';
 
 const packageSchema = new Schema<TPackage>(
   {
-    package_name: { type: String, enum: ['monthly', 'yearly'], required: true },
+    package_name: { type: String, required: true },
     price: { type: Number, required: true },
     text: { type: String, required: true },
+    duration: { type: Number, required: true },
   },
   { timestamps: true },
 );

@@ -2,11 +2,34 @@ import handleAsyncRequest from "../../utils/handleAsyncRequest";
 import { successResponse } from "../../utils/successResponse";
 import { paymentServices } from "./payment.service";
 
+const createPaymentSession = handleAsyncRequest(async (req: any, res) => {
+  const package_name = req.body.package_name;
+  const email = req.user.email;
+  const currency = req.body.currency || "usd";
+
+  const result = await paymentServices.createPaymentSession(package_name, email, currency);
+  successResponse(res, {
+    message: "Payment session created successfully!",
+    data: result,
+    status: 201
+  });
+});
+
 const getAllPayments = handleAsyncRequest(async (req, res) => {
   const query = req.query
   const result = await paymentServices.getAllPayments(query);
   successResponse(res, {
     message: "Payments retrieved successfully!",
+    data: result
+  });
+});
+
+const paymentCallback = handleAsyncRequest(async (req: any, res) => {
+  const query = req.query;
+  // const id = req.user.id
+  const result = await paymentServices.paymentCallback(query);
+  successResponse(res, {
+    message: "Payment successful!",
     data: result
   });
 });
@@ -22,7 +45,9 @@ const getSinglePayment = handleAsyncRequest(async (req, res) => {
 
 const paymentControllers = {
   getAllPayments,
-  getSinglePayment
+  getSinglePayment,
+  paymentCallback,
+  createPaymentSession
 };
 
 export default paymentControllers;

@@ -6,17 +6,16 @@ import Subscription from "./subscription.model";
 import Payment from "../payment/payment.model";
 import { AppError } from "../../classes/appError";
 
-const createOrUpdateSubscription = async (userId: string, amount: number, package_name: "monthly" | "yearly") => {
+const createOrUpdateSubscription = async (userId: string, amount: number, currency: string, package_name: string, duration: number) => {
   const transaction_id = generateTransactionId()
   const paymentData = {
     user: userId,
     amount,
     transaction_id,
     status: "paid",
-    currency: "USD"
+    currency
   }
 
-  const duration = package_name === "monthly" ? 1 : 12;
   const start_date = new Date();
   let end_date = new Date(start_date);
   end_date.setMonth(start_date.getMonth() + duration);

@@ -2,12 +2,12 @@ import handleAsyncRequest from "../../utils/handleAsyncRequest";
 import { successResponse } from "../../utils/successResponse";
 import subscriptionServices from "./subscription.service";
 
-
 const createOrUpdateSubscription = handleAsyncRequest(async (req: any, res) => {
   const userId = req?.user.id;
   const amount = req.body.amount;
   const package_name = req.body.package_name;
-  const result = await subscriptionServices.createOrUpdateSubscription(userId, amount, package_name);
+  const currency = req.body.currency;
+  const result = await subscriptionServices.createOrUpdateSubscription(userId, amount, currency, package_name);
   successResponse(res, {
     message: "Subscription created successfully!",
     data: result,

@@ -6,5 +6,4 @@ export interface TPayment {
   transaction_id: string;
   status: string;
   currency: string;
-  purpose: "subscription" | "star";
 }
