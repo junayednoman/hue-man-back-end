@@ -6,8 +6,9 @@ const createOrUpdateSubscription = handleAsyncRequest(async (req: any, res) => {
   const userId = req?.user.id;
   const amount = req.body.amount;
   const package_name = req.body.package_name;
-  const currency = req.body.currency;
-  const result = await subscriptionServices.createOrUpdateSubscription(userId, amount, currency, package_name);
+  const currency = req.body.currency || "usd";
+  const duration = req.body.duration;
+  const result = await subscriptionServices.createOrUpdateSubscription(userId, amount, currency, package_name, duration);
   successResponse(res, {
     message: "Subscription created successfully!",
     data: result,
