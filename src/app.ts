@@ -6,7 +6,13 @@ import routeNotFound from "./app/middlewares/routeNotFound";
 
 const app = express();
 
-app.use(cors({ origin: ["http://localhost:5000"] }));
+app.use(cors({
+  origin: ["http://localhost:3000"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use("/api/v1", router);
 
