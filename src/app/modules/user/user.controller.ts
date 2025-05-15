@@ -31,6 +31,15 @@ const getSingleUser = handleAsyncRequest(async (req, res) => {
   });
 });
 
+const getProfile = handleAsyncRequest(async (req: any, res) => {
+  const email = req.user.email
+  const result = await userServices.getProfile(email);
+  successResponse(res, {
+    message: "User profile retrieved successfully!",
+    data: result,
+  });
+});
+
 const updateUser = handleAsyncRequest(async (req: any, res) => {
   const email = req?.user?.email;
 
@@ -66,6 +75,7 @@ const deleteUser = handleAsyncRequest(async (req: any, res) => {
 const userControllers = {
   signUp,
   getAllUsers,
+  getProfile,
   getSingleUser,
   updateUser,
   deleteUser,

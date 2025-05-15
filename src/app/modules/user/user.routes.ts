@@ -6,6 +6,7 @@ import { uploadSingleImage } from "../../utils/multerFIleUploader";
 const userRouters = Router();
 
 userRouters.get("/", authVerify(["admin"]), userControllers.getAllUsers);
+userRouters.get("/profile", authVerify(["user"]), userControllers.getProfile);
 userRouters.get(
   "/:id",
   authVerify(["admin", "user"]),

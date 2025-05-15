@@ -113,6 +113,11 @@ const getSingleUser = async (id: string) => {
   return user;
 };
 
+const getProfile = async (email: string) => {
+  const user = await UserModel.findOne({ email });
+  return user;
+};
+
 const updateUser = async (
   email: string,
   payload: Partial<TUserProfile>,
@@ -186,5 +191,6 @@ const userServices = {
   getSingleUser,
   updateUser,
   deleteUser,
+  getProfile
 };
 export default userServices;
