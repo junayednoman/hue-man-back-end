@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongoose';
 
 export type TSubscription = {
-  user: string;
+  user: ObjectId;
   package_name: ObjectId;
   start_date: Date;
   end_date: Date;
