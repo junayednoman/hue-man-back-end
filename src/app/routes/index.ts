@@ -15,6 +15,7 @@ import subscriptionRouters from "../modules/subscription/subscription.routes";
 import paymentRouters from "../modules/payment/payment.routes";
 import applicationRouters from "../modules/application/application.routes";
 import supportMessageRouters from "../modules/support/support.routes";
+import printRouters from "../modules/print/print.routes";
 
 const router = Router();
 
@@ -35,6 +36,7 @@ const apiRoutes = [
   { path: "/custom-voices", route: customVoiceRouters },
   { path: "/applications", route: applicationRouters },
   { path: "/support-messages", route: supportMessageRouters },
+  { path: "/prints", route: printRouters },
 ];
 
 apiRoutes.forEach((route) => {

@@ -36,7 +36,8 @@ const getSingleSubscription = handleAsyncRequest(async (req, res) => {
 
 const getMySubscription = handleAsyncRequest(async (req: any, res) => {
   const email = req.user.email;
-  const result = await subscriptionServices.getMySubscription(email);
+  const web = req.query.web || false;
+  const result = await subscriptionServices.getMySubscription(email, web);
   successResponse(res, {
     message: "Subscription retrieved successfully!",
     data: result

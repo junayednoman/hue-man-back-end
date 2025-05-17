@@ -3,25 +3,20 @@ import QueryBuilder from "../../classes/queryBuilder";
 import UserModel from "../user/user.model";
 import Stripe from "stripe";
 import config from "../../config";
-import PackageModel from "../packages/packages.model";
 import { AppError } from "../../classes/appError";
 import mongoose from "mongoose";
 import Subscription from "../subscription/subscription.model";
 import { generateTransactionId } from "../../utils/transactionIdGenerator";
+import { printServices } from "../print/print.service";
 
 // Initialize the Stripe client
 const stripe = new Stripe(config.stripe_secret_key as string, {
   apiVersion: "2024-12-18.acacia",
 });
 
-const createPaymentSession = async (package_name: string, email: string, currency: string) => {
+const createPaymentSession = async (package_name: 'monthly' | 'yearly' | 'single' | 'bundle' | 'combo', email: string, currency: string, price: number, web: boolean) => {
   const user = await UserModel.findOne({ email });
-
   if (!user) throw new AppError(401, "Unauthorized");
-
-  const subscriptionPackage = await PackageModel.findOne({ package_name });
-
-  if (!subscriptionPackage) throw new AppError(404, "Invalid package name");
 
   const transaction_id = generateTransactionId()
 
@@ -33,14 +28,14 @@ const createPaymentSession = async (package_name: string, email: string, currenc
           product_data: {
             name: `Subscribe to ${package_name?.replace(/^\w/, c => c.toUpperCase())} plan`,
           },
-          unit_amount: Math.ceil(subscriptionPackage!.price * 100),
+          unit_amount: Math.ceil(price * 100),
         },
         quantity: 1,
       },
     ],
     mode: "payment",
     customer_email: email,
-    success_url: `${config.payment_success_url}?session_id={CHECKOUT_SESSION_ID}&transaction_id=${transaction_id}&duration=${subscriptionPackage!.duration}&plan=${subscriptionPackage!._id}&userId=${user?._id}`,
+    success_url: `${config.payment_success_url}?session_id={CHECKOUT_SESSION_ID}&transaction_id=${transaction_id}&duration=${package_name === "monthly" ? 1 : 12}&userId=${user?._id}&web=${web}&email=${email}&package_name=${package_name}`,
     cancel_url: config.payment_cancel_url,
   });
 
@@ -48,15 +43,19 @@ const createPaymentSession = async (package_name: string, email: string, currenc
 }
 
 const paymentCallback = async (query: Record<string, any>) => {
-  const { session_id, transaction_id, duration, plan, userId } = query;
+  const { session_id, transaction_id, duration, userId, web, email, package_name } = query;
   const paymentSession = await stripe.checkout.sessions.retrieve(session_id);
   const isPaymentExist = await Payment.findOne({ transaction_id });
   if (isPaymentExist) {
     return;
   }
-  
+
   const session = await mongoose.startSession();
   if (paymentSession.payment_status === 'paid') {
+    if (web) {
+      await printServices.createPrints(email);
+    }
+
     session.startTransaction();
 
     const paymentData = {
@@ -76,9 +75,9 @@ const paymentCallback = async (query: Record<string, any>) => {
 
     end_date.setMonth(start_date.getMonth() + duration);
 
-    const subscription = await Subscription.findOne({ user: userId });
+    const subscription = await Subscription.findOne({ user: userId, web: web ? true : false });
 
-    if (subscription) {
+    if (!web && subscription) {
       const previous_end_date = subscription.end_date;
       if (previous_end_date && !isNaN(previous_end_date.getTime())) {
         const monthsRemaining = Math.max(0, (previous_end_date.getFullYear() - start_date.getFullYear()) * 12 + previous_end_date.getMonth() - start_date.getMonth());
@@ -89,15 +88,15 @@ const paymentCallback = async (query: Record<string, any>) => {
 
     const subscriptionData = {
       user: userId,
-      plan,
       start_date,
       end_date,
       status: "active",
+      package_name
     };
 
     try {
       await Payment.create([paymentData], { session });
-      await Subscription.findOneAndUpdate({ user: userId }, subscriptionData, { session, upsert: true });
+      await Subscription.findOneAndUpdate({ user: userId, web: web ? true : false }, subscriptionData, { session, upsert: true });
 
       await session.commitTransaction();
       return { message: "Payment successful" };
@@ -109,7 +108,6 @@ const paymentCallback = async (query: Record<string, any>) => {
     }
   } else throw new AppError(400, "Payment failed!");
 };
-
 
 const getAllPayments = async (query: Record<string, any>) => {
   const searchableFields = [

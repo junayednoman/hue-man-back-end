@@ -78,9 +78,9 @@ const getSingleSubscription = async (id: string) => {
   return result;
 };
 
-const getMySubscription = async (email: string) => {
+const getMySubscription = async (email: string, web: boolean) => {
   const user = await User.findOne({ email, is_blocked: false, is_deleted: false });
-  const result = await Subscription.findOne({ user: user?._id, status: "active" });
+  const result = await Subscription.findOne({ user: user?._id, status: "active", web });
   return result;
 };
 

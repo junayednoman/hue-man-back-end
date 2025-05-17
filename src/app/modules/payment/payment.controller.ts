@@ -6,8 +6,10 @@ const createPaymentSession = handleAsyncRequest(async (req: any, res) => {
   const package_name = req.body.package_name;
   const email = req.user.email;
   const currency = req.body.currency || "usd";
+  const price = req.body.price;
+  const web = req.body.web;
 
-  const result = await paymentServices.createPaymentSession(package_name, email, currency);
+  const result = await paymentServices.createPaymentSession(package_name, email, currency, price, web);
   successResponse(res, {
     message: "Payment session created successfully!",
     data: result,
