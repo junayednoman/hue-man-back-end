@@ -1,3 +1,4 @@
+import config from "../../config";
 import handleAsyncRequest from "../../utils/handleAsyncRequest";
 import { successResponse } from "../../utils/successResponse";
 import { paymentServices } from "./payment.service";
@@ -30,10 +31,9 @@ const paymentCallback = handleAsyncRequest(async (req: any, res) => {
   const query = req.query;
   // const id = req.user.id
   const result = await paymentServices.paymentCallback(query);
-  successResponse(res, {
-    message: "Payment successful!",
-    data: result
-  });
+  if (result?.success) {
+    return res.redirect(config.payment_success_page!);
+  }
 });
 
 const getSinglePayment = handleAsyncRequest(async (req, res) => {

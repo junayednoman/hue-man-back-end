@@ -24,4 +24,6 @@ export default {
   stripe_secret_key: process.env.STRIPE_SECRET_KEY,
   payment_success_url: process.env.PAYMENT_SUCCESS_URL,
   payment_cancel_url: process.env.PAYMENT_CANCEL_URL,
+  payment_success_page: process.env.PAYMENT_SUCCESS_PAGE,
+  payment_failure_page: process.env.PAYMENT_CANCEL_PAGE
 };

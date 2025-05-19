@@ -1,6 +1,5 @@
 import Payment from "./payment.model";
 import QueryBuilder from "../../classes/queryBuilder";
-import UserModel from "../user/user.model";
 import Stripe from "stripe";
 import config from "../../config";
 import { AppError } from "../../classes/appError";
@@ -8,6 +7,7 @@ import mongoose from "mongoose";
 import Subscription from "../subscription/subscription.model";
 import { generateTransactionId } from "../../utils/transactionIdGenerator";
 import { printServices } from "../print/print.service";
+import AuthModel from "../auth/auth.model";
 
 // Initialize the Stripe client
 const stripe = new Stripe(config.stripe_secret_key as string, {
@@ -15,7 +15,7 @@ const stripe = new Stripe(config.stripe_secret_key as string, {
 });
 
 const createPaymentSession = async (package_name: 'monthly' | 'yearly' | 'single' | 'bundle' | 'combo', email: string, currency: string, price: number, web: boolean) => {
-  const user = await UserModel.findOne({ email });
+  const user = await AuthModel.findOne({ email });
   if (!user) throw new AppError(401, "Unauthorized");
 
   const transaction_id = generateTransactionId()
@@ -99,7 +99,7 @@ const paymentCallback = async (query: Record<string, any>) => {
       await Subscription.findOneAndUpdate({ user: userId, web: web ? true : false }, subscriptionData, { session, upsert: true });
 
       await session.commitTransaction();
-      return { message: "Payment successful" };
+      return { message: "Payment successful", success: true };
     } catch (error: any) {
       await session.abortTransaction();
       throw new AppError(500, error.message || "Error verifying payment");

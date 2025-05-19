@@ -7,7 +7,7 @@ import { subscriptionValidationSchema } from "./subscription.validation";
 const subscriptionRouters = Router();
 
 subscriptionRouters.post("/", authVerify(["user"]), handleZodValidation(subscriptionValidationSchema), subscriptionControllers.createOrUpdateSubscription);
-subscriptionRouters.get('/', authVerify(["admin"]), subscriptionControllers.getAllSubscriptions);
+subscriptionRouters.get('/', subscriptionControllers.getAllSubscriptions);
 subscriptionRouters.get('/my', authVerify(["user"]), subscriptionControllers.getMySubscription);
 subscriptionRouters.get('/:id', authVerify(["admin"]), subscriptionControllers.getSingleSubscription);
 

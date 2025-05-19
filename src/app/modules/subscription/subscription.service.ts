@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import QueryBuilder from "../../classes/queryBuilder";
 import { generateTransactionId } from "../../utils/transactionIdGenerator";
-import User from "../user/user.model";
 import Subscription from "./subscription.model";
 import Payment from "../payment/payment.model";
 import { AppError } from "../../classes/appError";
@@ -69,7 +68,7 @@ const getAllSubscriptions = async (query: Record<string, any>) => {
     .selectFields();
 
   const meta = await userQuery.countTotal();
-  const result = await userQuery.queryModel.populate("user", "name email").populate("plan", "name");
+  const result = await userQuery.queryModel.populate("user", "name email");
   return { data: result, meta };
 };
 
@@ -78,9 +77,8 @@ const getSingleSubscription = async (id: string) => {
   return result;
 };
 
-const getMySubscription = async (email: string, web: boolean) => {
-  const user = await User.findOne({ email, is_blocked: false, is_deleted: false });
-  const result = await Subscription.findOne({ user: user?._id, status: "active", web });
+const getMySubscription = async (id: string, web: boolean) => {
+  const result = await Subscription.findOne({ user: id, status: "active", web });
   return result;
 };
 
