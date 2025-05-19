@@ -40,6 +40,7 @@ authRouters.post(
 );
 authRouters.post(
   "/create-new-password",
+  authVerify(["user", "admin"]),
   handleZodValidation(createNewPasswordValidationSchema),
   AuthController.createNewPassword
 );
