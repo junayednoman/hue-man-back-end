@@ -43,12 +43,6 @@ export const resetForgottenPasswordSchema = z.object({
 });
 
 export const createNewPasswordValidationSchema = z.object({
-  email: z
-    .string()
-    .email("Invalid email address")
-    .trim()
-    .toLowerCase()
-    .nonempty("Email is required"),
   oldPassword: z.string().nonempty("Old Password is required"),
   newPassword: z.string().nonempty("New Password is required"),
 });

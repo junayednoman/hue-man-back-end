@@ -54,7 +54,7 @@ const resetForgottenPassword = handleAsyncRequest(async (req, res) => {
 });
 
 const createNewPassword = handleAsyncRequest(async (req: any, res) => {
-  const email = req.user.email
+  const email = req.user.email;
   const payload = req.body;
   const result = await AuthServices.createNewPassword(email, payload);
 
