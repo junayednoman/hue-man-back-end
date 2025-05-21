@@ -121,10 +121,13 @@ const updateUser = async (
   email: string,
   payload: Partial<TUserProfile>,
 ) => {
+  // return console.log('payload', payload);
   const user = await UserModel.findOne({ email });
   if (!user) {
     throw new AppError(404, "User not found");
   }
+
+  const userOldImg = user.image;
 
   if (email && email !== user.email) {
     throw new AppError(403, "Forbidden");
@@ -134,8 +137,8 @@ const updateUser = async (
     new: true,
   });
 
-  if (result && payload.image) {
-    await deleteFile(user.image);
+  if (result && payload.image && userOldImg) {
+    await deleteFile(userOldImg);
   }
 
   return result;

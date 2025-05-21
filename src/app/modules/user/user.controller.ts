@@ -46,7 +46,7 @@ const updateUser = handleAsyncRequest(async (req: any, res) => {
   // Handle uploaded file (if any)
   const imageFile = req.file;
 
-  const image = `/images/${imageFile?.filename}`;
+  const image = `uploads/images/${imageFile?.filename}`;
 
   const textData = JSON.parse(req?.body?.data);
 
