@@ -8,7 +8,6 @@ import bcrypt from "bcrypt";
 import QueryBuilder from "../../classes/queryBuilder";
 import { TUserProfile } from "./user.interface";
 import { deleteFile } from "../../utils/deleteFile";
-import { defaultProfileImg } from "../../constants/global.constant";
 import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
 
@@ -135,7 +134,7 @@ const updateUser = async (
     new: true,
   });
 
-  if (result && payload.image && user.image !== defaultProfileImg) {
+  if (result && payload.image) {
     await deleteFile(user.image);
   }
 

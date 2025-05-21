@@ -10,7 +10,7 @@ const isUserExist = async (email: string) => {
     is_blocked: false,
   });
   if (!user) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Incorrect user email", "email");
+    throw new AppError(StatusCodes.NOT_FOUND, "User not found!", "email");
   }
   return user;
 };

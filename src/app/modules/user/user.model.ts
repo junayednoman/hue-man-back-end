@@ -1,13 +1,10 @@
 import mongoose from "mongoose";
 import { TUserProfile } from "./user.interface";
-import {
-  defaultProfileImg,
-} from "../../constants/global.constant";
 
 const userSchema = new mongoose.Schema({
   image: {
     type: String,
-    default: defaultProfileImg,
+    default: null,
   },
   name: {
     type: String,
