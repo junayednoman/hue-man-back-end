@@ -14,7 +14,7 @@ const stripe = new Stripe(config.stripe_secret_key as string, {
   apiVersion: "2024-12-18.acacia",
 });
 
-const createPaymentSession = async (package_name: 'monthly' | 'yearly' | 'single' | 'bundle' | 'combo', email: string, currency: string, price: number, web: boolean) => {
+const createPaymentSession = async (package_name: 'monthly' | 'yearly' | 'single' | 'bundle' | 'combo', email: string, currency: string, price: number, web = false) => {
   const user = await AuthModel.findOne({ email });
   if (!user) throw new AppError(401, "Unauthorized");
 
@@ -46,13 +46,14 @@ const paymentCallback = async (query: Record<string, any>) => {
   const { session_id, transaction_id, duration, userId, web, email, package_name } = query;
   const paymentSession = await stripe.checkout.sessions.retrieve(session_id);
   const isPaymentExist = await Payment.findOne({ transaction_id });
+  
   if (isPaymentExist) {
-    return;
+    return { web: web === "true" ? true : false }
   }
 
   const session = await mongoose.startSession();
   if (paymentSession.payment_status === 'paid') {
-    if (web) {
+    if (web === "true") {
       await printServices.createPrints(email);
     }
 
@@ -75,9 +76,9 @@ const paymentCallback = async (query: Record<string, any>) => {
 
     end_date.setMonth(start_date.getMonth() + duration);
 
-    const subscription = await Subscription.findOne({ user: userId, web: web ? true : false });
+    const subscription = await Subscription.findOne({ user: userId, web: web === "true" ? true : false });
 
-    if (!web && subscription) {
+    if (web === "false" && subscription) {
       const previous_end_date = subscription.end_date;
       if (previous_end_date && !isNaN(previous_end_date.getTime())) {
         const monthsRemaining = Math.max(0, (previous_end_date.getFullYear() - start_date.getFullYear()) * 12 + previous_end_date.getMonth() - start_date.getMonth());
@@ -96,10 +97,10 @@ const paymentCallback = async (query: Record<string, any>) => {
 
     try {
       await Payment.create([paymentData], { session });
-      await Subscription.findOneAndUpdate({ user: userId, web: web ? true : false }, subscriptionData, { session, upsert: true });
+      await Subscription.findOneAndUpdate({ user: userId, web: web === "true" ? true : false }, subscriptionData, { session, upsert: true });
 
       await session.commitTransaction();
-      return { message: "Payment successful", success: true };
+      return { message: "Payment successful", success: true, web: web === "true" ? true : false };
     } catch (error: any) {
       await session.abortTransaction();
       throw new AppError(500, error.message || "Error verifying payment");

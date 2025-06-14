@@ -29,9 +29,12 @@ const getAllPayments = handleAsyncRequest(async (req, res) => {
 
 const paymentCallback = handleAsyncRequest(async (req: any, res) => {
   const query = req.query;
-  // const id = req.user.id
   const result = await paymentServices.paymentCallback(query);
-  if (result?.success) {
+  if (!result.web) {
+    successResponse(res, {
+      message: "Payment successful!"
+    });
+  } else if (result?.success && result.web) {
     return res.redirect(config.payment_success_page!);
   }
 });
