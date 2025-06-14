@@ -46,7 +46,7 @@ const paymentCallback = async (query: Record<string, any>) => {
   const { session_id, transaction_id, duration, userId, web, email, package_name } = query;
   const paymentSession = await stripe.checkout.sessions.retrieve(session_id);
   const isPaymentExist = await Payment.findOne({ transaction_id });
-  
+
   if (isPaymentExist) {
     return { web: web === "true" ? true : false }
   }
@@ -74,7 +74,7 @@ const paymentCallback = async (query: Record<string, any>) => {
 
     let end_date = new Date(start_date);
 
-    end_date.setMonth(start_date.getMonth() + duration);
+    end_date.setMonth(start_date.getMonth() + Number(duration));
 
     const subscription = await Subscription.findOne({ user: userId, web: web === "true" ? true : false });
 
@@ -83,7 +83,7 @@ const paymentCallback = async (query: Record<string, any>) => {
       if (previous_end_date && !isNaN(previous_end_date.getTime())) {
         const monthsRemaining = Math.max(0, (previous_end_date.getFullYear() - start_date.getFullYear()) * 12 + previous_end_date.getMonth() - start_date.getMonth());
         end_date = new Date(start_date);
-        end_date.setMonth(start_date.getMonth() + monthsRemaining + duration);
+        end_date.setMonth(start_date.getMonth() + monthsRemaining + Number(duration));
       }
     }
 
