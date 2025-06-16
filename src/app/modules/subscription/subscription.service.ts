@@ -4,6 +4,7 @@ import { generateTransactionId } from "../../utils/transactionIdGenerator";
 import Subscription from "./subscription.model";
 import Payment from "../payment/payment.model";
 import { AppError } from "../../classes/appError";
+import PackageModel from "../packages/packages.model";
 
 const createOrUpdateSubscription = async (userId: string, amount: number, currency: string, package_name: string, duration: number) => {
   const transaction_id = generateTransactionId()
@@ -79,7 +80,8 @@ const getSingleSubscription = async (id: string) => {
 
 const getMySubscription = async (id: string, web: boolean) => {
   const result = await Subscription.findOne({ user: id, status: "active", web });
-  return result;
+  const packageData = await PackageModel.findOne({ package_name: result?.package_name })
+  return packageData;
 };
 
 const subscriptionServices = {
