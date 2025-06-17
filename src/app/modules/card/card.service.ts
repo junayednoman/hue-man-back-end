@@ -61,9 +61,10 @@ const getAllCards = async (query: Record<string, any>) => {
 
 const getSingleCard = async (id: string, userId: string) => {
   const card = await CardModel.findById(id);
-  const customVoice = await CustomVoice.findOne({ user: userId, card: id });
+  const customVoice = await CustomVoice.findOne({ user: userId, card: id }).lean();
   if (card && customVoice) {
-    card.audio = customVoice.voice;
+    const result = { ...card.toObject(), custom_voice: customVoice.voice };
+    return result;
   }
   return card;
 }
