@@ -35,10 +35,9 @@ const getAllCategories = async (query: Record<string, any>) => {
   const searchableFields = [
     "name",
   ];
+  query.limit = 100000
   const categoryQuery = new QueryBuilder(
-    CategoryModel.find({
-      is_deleted: false,
-    }),
+    CategoryModel.find(),
     query
   )
     .search(searchableFields)

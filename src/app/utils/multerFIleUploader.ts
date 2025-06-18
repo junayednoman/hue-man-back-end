@@ -5,7 +5,7 @@ import { Express } from "express";
 
 // Set allowed file types for images and audio
 const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"];
-const allowedAudioTypes = ["audio/mp3", "audio/m4a", "audio/mpeg", "audio/wav", "audio/ogg"];
+const allowedAudioTypes = ["audio/mp3", "audio/m4a", "audio/mpeg", "audio/wav", "audio/ogg", "audio/mp4"];
 
 // Multer storage configuration
 const storage = multer.diskStorage({
