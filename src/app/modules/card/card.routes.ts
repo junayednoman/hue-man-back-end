@@ -18,5 +18,4 @@ cardRouters.post(
 cardRouters.get("/", cardControllers.getAllCards);
 cardRouters.get("/:id", authVerify(["user"]), cardControllers.getSingleCard);
 
-
 export default cardRouters;

@@ -8,15 +8,17 @@ import { CardValidationSchema } from "./card.validation";
 
 const createCard = handleAsyncRequest(async (req, res) => {
   // Handle uploaded file (if any)
-  const files = req.files as any;
+  const files = req?.files as any;
 
-  const imageName = files.image[0].filename;
-  const audioName = files.audio[0].filename;
+  const imageName = files?.image[0]?.filename;
+  let audio = "";
+  if (files?.audio) {
+    const audioName = files?.audio[0]?.filename;
+    audio = `uploads/audio/${audioName}`;
+  }
   if (!imageName) throw new AppError(400, "Please provide an image file");
-  if (!audioName) throw new AppError(400, "Please provide an audio file");
 
   const image = `${imageName}`;
-  const audio = `uploads/audio/${audioName}`;
 
   const textData = JSON.parse(req?.body?.data);
 

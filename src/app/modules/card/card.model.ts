@@ -24,7 +24,6 @@ const CardSchema: Schema = new Schema<TCard>(
     },
     audio: {
       type: String,
-      required: true,
     },
   },
   { timestamps: true }

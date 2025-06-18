@@ -8,14 +8,12 @@ const categoryRouters = Router();
 
 categoryRouters.post(
   "/",
-  authVerify(["admin"]),
   uploadSingleImage,
   categoryControllers.createCategory
 );
 
 categoryRouters.post(
   "/many",
-  authVerify(["admin"]),
   handleZodValidation(createManyCategoriesValidationSchema),
   categoryControllers.createManyCategories
 );
