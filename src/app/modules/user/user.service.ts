@@ -114,7 +114,8 @@ const getSingleUser = async (id: string) => {
 
 const getProfile = async (email: string) => {
   const user = await UserModel.findOne({ email });
-  return user;
+  const auth = await AuthModel.findOne({ email });
+  return { ...user?.toObject(), user_id: auth?._id };
 };
 
 const updateUser = async (
