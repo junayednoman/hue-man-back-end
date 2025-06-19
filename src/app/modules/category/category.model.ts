@@ -6,6 +6,7 @@ const categorySchema = new Schema<TCategory>(
     image: { type: String, required: true },
     name: { type: String, required: true, trim: true },
     is_deleted: { type: Boolean, default: false },
+    parent: { type: Schema.Types.ObjectId, ref: "Category", default: null },
   },
   {
     timestamps: true,
