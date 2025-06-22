@@ -6,7 +6,7 @@ import ApplicationValidationSchema from "./application.validation";
 
 const applicationRouters = Router();
 
-applicationRouters.post("/", authVerify(["user"]), handleZodValidation(ApplicationValidationSchema), applicationControllers.createApplication);
+applicationRouters.post("/", handleZodValidation(ApplicationValidationSchema), applicationControllers.createApplication);
 applicationRouters.get("/", authVerify(["admin"]), applicationControllers.getApplications);
 applicationRouters.get("/:id", authVerify(["admin", "user"]), applicationControllers.getApplication);
 

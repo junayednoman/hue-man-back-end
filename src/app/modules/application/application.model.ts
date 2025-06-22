@@ -6,7 +6,6 @@ const ApplicationSchema = new Schema<TApplication>(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     full_name: {
       type: String,

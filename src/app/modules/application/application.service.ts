@@ -1,21 +1,39 @@
-import UserModel from "../user/user.model";
+import config from "../../config";
+import { sendEmail } from "../../utils/sendEmail";
 import { TApplication } from "./application.interface";
 import ApplicationModel from "./application.model";
 
-const createApplication = async (payload: TApplication, email: string) => {
-  const user = await UserModel.findOne({ email });
+const createApplication = async (payload: TApplication) => {
+  const result = await ApplicationModel.create(payload)
 
-  const application = await ApplicationModel.findOne({ user: user?._id });
-  if (application) {
-    throw new Error("Application already exists");
-  }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  payload.user = user!._id;
-  const result = await ApplicationModel.create(payload);
-  return result;
-};
+  // Compose email content (HTML or plain text)
+  const htmlContent = `
+    <h2>New Application Received</h2>
+    <p><strong>Full Name:</strong> ${payload.full_name}</p>
+    <p><strong>Email:</strong> ${payload.email_address}</p>
+    <p><strong>About Yourself:</strong> ${payload.about_yourself}</p>
+    <p><strong>Promotion Methods:</strong></p>
+    <ul>
+      <li>Social Media: ${payload.promotion_methods.social_media ? 'Yes' : 'No'}</li>
+      <li>Blogs/Newsletters: ${payload.promotion_methods.blogs_or_newsletters ? 'Yes' : 'No'}</li>
+      <li>Professional Events: ${payload.promotion_methods.professional_events ? 'Yes' : 'No'}</li>
+      <li>Other: ${payload.promotion_methods.other || 'N/A'}</li>
+    </ul>
+    <p><strong>Payout Method:</strong> ${payload.payout_method}</p>
+    <p><strong>Currently Using Hue Man:</strong> ${payload.currently_using_hue_man ? 'Yes' : 'No'}</p>
+  `
 
+  // Send email to admin
+  await sendEmail(
+    config.sender_email as string,
+    config.sender_email as string,
+    'New Application Received - Hue Man',
+    htmlContent,
+    undefined
+  )
+
+  return result
+}
 const getApplications = async () => {
   const result = await ApplicationModel.find({});
   return result;
