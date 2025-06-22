@@ -2,10 +2,9 @@ import handleAsyncRequest from "../../utils/handleAsyncRequest";
 import { successResponse } from "../../utils/successResponse";
 import applicationServices from "./application.service";
 
-const createApplication = handleAsyncRequest(async (req: any, res) => {
-  const email = req?.user?.email
+const createApplication = handleAsyncRequest(async (req, res) => {
   const payload = req.body;
-  const result = await applicationServices.createApplication(payload, email);
+  const result = await applicationServices.createApplication(payload);
   successResponse(res, {
     message: "Application created successfully!",
     data: result,
