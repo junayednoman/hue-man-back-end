@@ -80,8 +80,12 @@ const getSingleSubscription = async (id: string) => {
 
 const getMySubscription = async (id: string, web: boolean) => {
   const result = await Subscription.findOne({ user: id, status: "active", web });
-  const packageData = await PackageModel.findOne({ package_name: result?.package_name })
-  return packageData;
+  if (web) {
+    return result
+  } else {
+    const packageData = await PackageModel.findOne({ package_name: result?.package_name })
+    return packageData
+  }
 };
 
 const subscriptionServices = {
