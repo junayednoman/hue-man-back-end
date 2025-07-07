@@ -49,5 +49,10 @@ authRouters.get(
   authVerify(["user"]),
   AuthController.getSubAccounts
 );
+authRouters.delete(
+  "/sub-accounts/:subAccountId",
+  authVerify(["user"]),
+  AuthController.deleteSubAccount
+);
 
 export default authRouters;

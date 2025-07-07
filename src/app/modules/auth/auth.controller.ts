@@ -87,13 +87,25 @@ const getSubAccounts = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
+const deleteSubAccount = handleAsyncRequest(async (req: any, res) => {
+  const userId = req?.user?.id;
+  const subAccountId = req?.user?.subAccountId;
+  const result = await AuthServices.deleteSubAccount(userId, subAccountId);
+
+  successResponse(res, {
+    message: "Sub accounts deleted successfully!",
+    data: result,
+  });
+});
+
 const AuthController = {
   loginUser,
   sendOtp,
   verifyOtp,
   resetForgottenPassword,
   createNewPassword,
-  getSubAccounts
+  getSubAccounts,
+  deleteSubAccount
 };
 
 export default AuthController;
