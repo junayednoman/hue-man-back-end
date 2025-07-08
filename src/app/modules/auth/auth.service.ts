@@ -206,7 +206,7 @@ const getSubAccounts = async (userId: string) => {
 const deleteSubAccount = async (userId: string, subAccountId: string) => {
   const subAccount = await AuthModel.findById(subAccountId)
   if (!subAccount) throw new AppError(404, "Sub account not found")
-  if (userId !== subAccountId) throw new AppError(403, "Forbidden")
+  if (userId !== String(subAccount.parent_id)) throw new AppError(403, "Forbidden")
   const result = await AuthModel.findByIdAndDelete(subAccountId)
   return result
 }

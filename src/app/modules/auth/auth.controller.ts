@@ -89,7 +89,7 @@ const getSubAccounts = handleAsyncRequest(async (req: any, res) => {
 
 const deleteSubAccount = handleAsyncRequest(async (req: any, res) => {
   const userId = req?.user?.id;
-  const subAccountId = req?.user?.subAccountId;
+  const subAccountId = req?.params?.subAccountId;
   const result = await AuthServices.deleteSubAccount(userId, subAccountId);
 
   successResponse(res, {
