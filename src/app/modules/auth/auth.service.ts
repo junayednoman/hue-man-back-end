@@ -199,7 +199,7 @@ const createNewPassword = async (email: string, payload: {
 };
 
 const getSubAccounts = async (userId: string) => {
-  const subAccounts = await AuthModel.find({ parent_id: userId });
+  const subAccounts = await AuthModel.find({ parent_id: userId }).populate("user", "name email image").select("user role parent_id");
   return subAccounts
 }
 
