@@ -12,6 +12,7 @@ import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
 
 const signUp = async (payload: TSignUp) => {
+  console.log('payload', payload);
   // check if user exists
   const auth = await AuthModel.findOne({ email: payload.email, is_account_verified: true });
   if (auth) {
@@ -50,6 +51,7 @@ const signUp = async (payload: TSignUp) => {
     const authData = {
       email: payload.email,
       password: hashedPassword,
+      parent_id: payload.parent_id || null,
       otp: hashedOtp,
       otp_expires,
       otp_attempts: 0,
