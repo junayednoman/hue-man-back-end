@@ -7,12 +7,12 @@ import path from "path";
  * @returns A promise that resolves when the file is deleted or rejects with an error
  */
 export const deleteFile = (filePath: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const absolutePath = path.resolve(filePath);
 
     fs.unlink(absolutePath, (err) => {
       if (err) {
-        return reject(new Error(`Failed to delete file: ${err.message}`));
+        console.log(`Failed to delete file: ${err.message}`);
       }
       resolve();
     });

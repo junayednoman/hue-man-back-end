@@ -62,6 +62,7 @@ const updateCategory = async (
   payload: {
     name?: string;
     image?: string;
+    index?: number;
   }
 ) => {
   const category = await CategoryModel.findOne({ _id, is_deleted: false });
@@ -71,7 +72,6 @@ const updateCategory = async (
     }
     throw new AppError(404, "Category not found");
   }
-
   const result = await CategoryModel.findOneAndUpdate({ _id }, payload, {
     new: true,
   });

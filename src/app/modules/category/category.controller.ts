@@ -21,6 +21,7 @@ const createCategory = handleAsyncRequest(async (req, res) => {
   const payload = {
     image,
     name: textData.name,
+    index: textData.index,
   };
 
   handleZodValidation(categoryCreateValidationSchema);
@@ -72,6 +73,7 @@ const updateCategory = handleAsyncRequest(async (req, res) => {
   const payload = {
     image,
     name: textData.name,
+    index: textData.index,
   };
 
   handleZodValidation(updateCategoryValidationSchema);
