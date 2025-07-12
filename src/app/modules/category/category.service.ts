@@ -37,7 +37,7 @@ const getAllCategories = async (query: Record<string, any>) => {
   ];
   query.limit = 100000
   const categoryQuery = new QueryBuilder(
-    CategoryModel.find(),
+    CategoryModel.find({ parent: null }),
     query
   )
     .search(searchableFields)
