@@ -8,6 +8,7 @@ import Subscription from "../subscription/subscription.model";
 import { generateTransactionId } from "../../utils/transactionIdGenerator";
 import { printServices } from "../print/print.service";
 import AuthModel from "../auth/auth.model";
+import { PrintModel } from "../print/print.model";
 
 // Initialize the Stripe client
 const stripe = new Stripe(config.stripe_secret_key as string, {
@@ -54,7 +55,13 @@ const paymentCallback = async (query: Record<string, any>) => {
   const session = await mongoose.startSession();
   if (paymentSession.payment_status === 'paid') {
     if (web === "true") {
-      await printServices.createPrints(email);
+      const prints = await PrintModel.findOne({ user: userId });
+      if (prints) {
+        await PrintModel.updateMany({ user: userId }, { print_count: 0 });
+      } else {
+        await printServices.createPrints(email);
+      }
+
     }
 
     session.startTransaction();
