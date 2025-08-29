@@ -5,8 +5,8 @@ import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import config from "../../config";
 import generateOTP from "../../utils/generateOTP";
-import { sendEmail } from "../../utils/sendEmail";
 import isUserExist from "../../utils/isUserExist";
+import { sendEmail } from "../../utils/sendEmail";
 
 const loginUser = async (payload: { email: string; password: string, is_remember?: boolean }) => {
   const user = await isUserExist(payload.email);
@@ -52,14 +52,14 @@ const sendOtp = async (payload: { email: string }) => {
   // prepare email content
   const otp_expires = new Date(Date.now() + 3 * 60 * 1000);
   const subject = `Your OTP Code is Here - Hue-man Expressions`;
-  const htmlMarkup = `<p>Hi,</p>
+  const html_markup = `<p>Hi,</p>
   <p>Please use the following One-Time Password (OTP) to verify your email address:</p>
   <h2 style="color: #2e6c80;">${otp}</h2>
   <p>This OTP is valid for 3 minutes. If you did not request this, please ignore this email or contact our support team.</p>
   <p>Thank you,</p>
-  <p>Hue-man Expressions</p>`;
+  <p>Hue-man Expressions</p>`
 
-  sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
+  sendEmail(payload.email, subject, html_markup);
 
   await AuthModel.findByIdAndUpdate(
     user._id,
@@ -108,7 +108,7 @@ const verifyOtp = async (payload: {
     <p>Thank you,</p>
     <p>Hue-man Expressions</p>`;
 
-    sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
+    sendEmail(payload.email, subject, htmlMarkup);
     return await AuthModel.findByIdAndUpdate(user._id, {
       is_account_verified: true,
       $unset: { otp: "", otp_expires: "", otp_attempts: "" },
@@ -150,7 +150,7 @@ const resetForgottenPassword = async (payload: {
   <p>Thank you,</p>
   <p>Hue-man Expressions</p>`;
 
-    sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
+    sendEmail(payload.email, subject, htmlMarkup);
   }
 };
 

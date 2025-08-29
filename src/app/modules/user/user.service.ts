@@ -63,7 +63,7 @@ const signUp = async (payload: TSignUp) => {
     await AuthModel.findOneAndUpdate({ email: payload.email }, authData, { session, upsert: true, new: true });
 
     if (newUser) {
-      sendEmail(payload.email, config.sender_email, subject, htmlMarkup);
+      sendEmail(payload.email, subject, htmlMarkup);
     }
 
     await session.commitTransaction();
