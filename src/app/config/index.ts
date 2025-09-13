@@ -17,5 +17,9 @@ export default {
   payment_success_url: process.env.PAYMENT_SUCCESS_URL,
   payment_cancel_url: process.env.PAYMENT_CANCEL_URL,
   payment_success_page: process.env.PAYMENT_SUCCESS_PAGE,
-  payment_failure_page: process.env.PAYMENT_CANCEL_PAGE
+  payment_failure_page: process.env.PAYMENT_CANCEL_PAGE,
+  portia_payment_success_url: process.env.PORTIA_PAYMENT_SUCCESS,
+  portia_payment_cancel_url: process.env.PORTIA_PAYMENT_CANCEL,
+  portia_payment_callback: process.env.PORTIA_PAYMENT_CALLBACK,
+  admin_email: process.env.ADMIN_EMAIL,
 };

@@ -48,11 +48,28 @@ const getSinglePayment = handleAsyncRequest(async (req, res) => {
   });
 });
 
+const paymentSessionForPortia = handleAsyncRequest(async (req, res) => {
+  const result = await paymentServices.paymentSessionForPortia(req.body.price, req.body.payload);
+  successResponse(res, {
+    message: "Payment session created successfully!",
+    data: result,
+    status: 201
+  });
+});
+
+const portiaProPaymentCallback = handleAsyncRequest(async (req, res) => {
+  await paymentServices.portiaProPaymentCallback(req.query);
+
+  res.redirect(config.portia_payment_success_url as string);
+});
+
 const paymentControllers = {
   getAllPayments,
   getSinglePayment,
   paymentCallback,
-  createPaymentSession
+  createPaymentSession,
+  paymentSessionForPortia,
+  portiaProPaymentCallback
 };
 
 export default paymentControllers;

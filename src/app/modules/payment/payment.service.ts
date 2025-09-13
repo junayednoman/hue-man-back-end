@@ -9,6 +9,7 @@ import { generateTransactionId } from "../../utils/transactionIdGenerator";
 import { printServices } from "../print/print.service";
 import AuthModel from "../auth/auth.model";
 import { PrintModel } from "../print/print.model";
+import { sendEmail } from "../../utils/sendEmail";
 
 // Initialize the Stripe client
 const stripe = new Stripe(config.stripe_secret_key as string, {
@@ -37,7 +38,7 @@ const createPaymentSession = async (package_name: 'monthly' | 'yearly' | 'single
     mode: "payment",
     customer_email: email,
     success_url: `${config.payment_success_url}?session_id={CHECKOUT_SESSION_ID}&transaction_id=${transaction_id}&duration=${package_name === "monthly" ? 1 : 12}&userId=${user?._id}&web=${web}&email=${email}&package_name=${package_name}`,
-    cancel_url: config.payment_cancel_url,
+    cancel_url: config.portia_payment_cancel_url,
   });
 
   return { url: session.url };
@@ -143,9 +144,62 @@ const getSinglePayment = async (id: string) => {
   return result;
 }
 
+const paymentSessionForPortia = async (price: number, payload: { name: string, email: string, company: string, phone: string, address: string, quantity: number }) => {
+
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Portia Pro User`,
+          },
+          unit_amount: Math.ceil(price * 100),
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    customer_email: payload.email,
+    success_url: `${config.portia_payment_callback}?session_id={CHECKOUT_SESSION_ID}&name=${payload.name}&email=${payload.email}&company=${payload.company}&phone=${payload.phone}&address=${payload.address}&quantity=${payload.quantity}`,
+    cancel_url: config.portia_payment_cancel_url,
+  });
+
+  return { url: session.url };
+}
+
+const portiaProPaymentCallback = async (query: Record<string, any>) => {
+  const { session_id, name, email, company, phone, address, quantity } = query;
+  const paymentSession = await stripe.checkout.sessions.retrieve(session_id);
+  if (paymentSession.payment_status === 'paid') {
+    const subject = `Portia Pro New User Payment Received - ${name}`;
+    const html_markup = `<p>Hi Rashida,</p>
+  <p>A new payment has been received on <strong>Portia Pro</strong>. Here are the details:</p>
+
+  <h3 style="color: #2e6c80;">User Information</h3>
+  <ul>
+    <li><strong>Name:</strong> ${name}</li>
+    <li><strong>Email:</strong> ${email}</li>
+    <li><strong>Company:</strong> ${company}</li>
+    <li><strong>Phone:</strong> ${phone}</li>
+    <li><strong>Address:</strong> ${address}</li>
+    <li><strong>Quantity:</strong> ${quantity}</li>
+  </ul>
+
+  <p>Please review this payment in your dashboard and proceed with the necessary steps.</p>
+
+  <p>Thanks,</p>
+  <p><strong>Portia Pro System</strong></p>`;
+
+    sendEmail("junayednoman05@gmail.com" as string, subject, html_markup);
+  } else throw new AppError(400, "Payment failed!");
+};
+
 export const paymentServices = {
   createPaymentSession,
   getAllPayments,
   getSinglePayment,
-  paymentCallback
+  paymentCallback,
+  paymentSessionForPortia,
+  portiaProPaymentCallback
 }
