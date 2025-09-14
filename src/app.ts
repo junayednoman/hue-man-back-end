@@ -7,7 +7,7 @@ import routeNotFound from "./app/middlewares/routeNotFound";
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:3002", "http://147.182.247.218:3003", "https://huemanexpressions.com", "https://www.huemanexpressions.com", "http://147.182.247.218:3005", "http://10.10.10.78:3002"],
+  origin: ["https://huemanexpressions.com", "https://www.huemanexpressions.com", "https://portiapro.huemanexpressions.com"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
