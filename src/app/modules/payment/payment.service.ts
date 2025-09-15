@@ -191,7 +191,7 @@ const portiaProPaymentCallback = async (query: Record<string, any>) => {
   <p>Thanks,</p>
   <p><strong>Portia Pro System</strong></p>`;
 
-    sendEmail("junayednoman05@gmail.com" as string, subject, html_markup);
+    sendEmail(config.admin_email as string, subject, html_markup);
   } else throw new AppError(400, "Payment failed!");
 };
 
