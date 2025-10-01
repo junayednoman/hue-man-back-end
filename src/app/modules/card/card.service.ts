@@ -14,7 +14,7 @@ const createCard = async (payload: TCard) => {
   });
 
   if (!category) {
-    await deleteFile(payload.image);
+    await deleteFile(`uploads/images/${payload.image}`);
     await deleteFile(payload.audio);
     throw new AppError(404, "Category not found!")
   };
@@ -69,11 +69,51 @@ const getSingleCard = async (id: string, userId: string) => {
   return card;
 }
 
+const updateCard = async (id: string, payload: TCard) => {
+  const card = await CardModel.findById(id);
+  if (!card) {
+    await deleteFile(payload.image);
+    await deleteFile(payload.audio);
+    throw new AppError(404, "Card not found");
+  }
+
+  const result = await CardModel.findOneAndUpdate({ _id: id }, payload, { new: true, })
+  if (result) {
+    if (payload.image && card.image) {
+      await deleteFile(`uploads/images/${card.image}`);
+    }
+    if (payload.audio && card.audio) {
+      await deleteFile(card.audio);
+    }
+  }
+  return result;
+}
+
+const deleteCard = async (id: string) => {
+  const card = await CardModel.findById(id);
+  if (!card) {
+    throw new AppError(404, "Card not found");
+  }
+
+  const result = await CardModel.findByIdAndDelete(id);
+  if (result) {
+    if (card.image) {
+      await deleteFile(`uploads/images/${card.image}`);
+    }
+    if (card.audio) {
+      await deleteFile(card.audio);
+    }
+  }
+  return result;
+};
+
 const cardServices = {
   createCard,
   getAllCards,
   createCards,
-  getSingleCard
+  getSingleCard,
+  updateCard,
+  deleteCard
 };
 
 export default cardServices;

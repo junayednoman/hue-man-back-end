@@ -4,7 +4,7 @@ import handleAsyncRequest from "../../utils/handleAsyncRequest";
 import { successResponse } from "../../utils/successResponse";
 import { TCard } from "./card.interface";
 import cardServices from "./card.service";
-import { CardValidationSchema } from "./card.validation";
+import { CardUpdateValidationSchema, CardValidationSchema } from "./card.validation";
 
 const createCard = handleAsyncRequest(async (req, res) => {
   // Handle uploaded file (if any)
@@ -67,12 +67,51 @@ const getSingleCard = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
+const updateCard = handleAsyncRequest(async (req: any, res) => {
+  const id = req.params.id;
+  const files = req?.files as any;
+
+  const textData = JSON.parse(req?.body?.data || "{}");
+  const payload: TCard = {
+    ...textData,
+  };
+
+  if (files?.image) {
+    const imageName = files?.image[0]?.filename;
+    if (imageName) payload.image = imageName;
+  }
+
+
+  if (files?.audio) {
+    const audioName = files?.audio[0]?.filename;
+    payload.audio = `uploads/audio/${audioName}`;
+  }
+
+  handleZodValidation(CardUpdateValidationSchema);
+
+  const result = await cardServices.updateCard(id, payload);
+  successResponse(res, {
+    message: "Card updated successfully!",
+    data: result,
+  });
+});
+
+const deleteCard = handleAsyncRequest(async (req: any, res) => {
+  const id = req.params.id;
+  const result = await cardServices.deleteCard(id);
+  successResponse(res, {
+    message: "Card deleted successfully!",
+    data: result,
+  });
+});
 
 const cardControllers = {
   createCard,
   createCards,
   getAllCards,
-  getSingleCard
+  getSingleCard,
+  updateCard,
+  deleteCard
 };
 
 export default cardControllers;
