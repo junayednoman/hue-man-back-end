@@ -6,4 +6,5 @@ export type TCard = {
   name: string;
   image: string;
   audio: string;
+  index: number;
 };

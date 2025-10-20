@@ -96,6 +96,15 @@ const updateCard = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
+const updateCardIndex = handleAsyncRequest(async (req: any, res) => {
+  const id = req.params.id;
+  const result = await cardServices.updateCardIndex(id, req.body?.index);
+  successResponse(res, {
+    message: "Index updated successfully!",
+    data: result,
+  });
+});
+
 const deleteCard = handleAsyncRequest(async (req: any, res) => {
   const id = req.params.id;
   const result = await cardServices.deleteCard(id);
@@ -111,6 +120,7 @@ const cardControllers = {
   getAllCards,
   getSingleCard,
   updateCard,
+  updateCardIndex,
   deleteCard
 };
 

@@ -24,6 +24,7 @@ cardRouters.put("/:id", upload.fields([
   { name: "audio", maxCount: 1 },
 ]), cardControllers.updateCard);
 
+cardRouters.patch("/index/:id", cardControllers.updateCardIndex);
 
 cardRouters.delete("/:id", cardControllers.deleteCard);
 
