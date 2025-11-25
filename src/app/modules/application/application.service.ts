@@ -1,4 +1,5 @@
 import { sendEmail } from "../../utils/sendEmail";
+import config from "../../config";
 import { TApplication } from "./application.interface";
 import ApplicationModel from "./application.model";
 
@@ -22,7 +23,7 @@ const createApplication = async (payload: TApplication) => {
     <p><strong>Currently Using Hue Man:</strong> ${payload.currently_using_hue_man ? 'Yes' : 'No'}</p>
   `
 
-  sendEmail(payload.email_address, 'New Application Received - Hue Man', htmlContent);
+  sendEmail(config.admin_email as string, 'New Application Received - Hue Man', htmlContent);
 
   return result
 }

@@ -1,6 +1,7 @@
 import { AppError } from "../../classes/appError";
 import { sendEmail } from "../../utils/sendEmail";
 import UserModel from "../user/user.model";
+import config from "../../config";
 import { TSupportMessage } from "./support.interface";
 import SupportMessageModel from "./support.model";
 import fs from "fs";
@@ -21,7 +22,7 @@ const sendSupportMessage = async (payload: TSupportMessage) => {
       .replace('{{subject}}', payload.subject)
       .replace('{{message}}', payload.message);
 
-    sendEmail(payload.email, payload.subject, emailContent);
+    sendEmail(config.admin_email as string, payload.subject, emailContent);
   })
   const result = await SupportMessageModel.create(payload);
   return result;
