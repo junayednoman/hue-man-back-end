@@ -40,14 +40,14 @@ const createPaymentSession = async (
     "name email"
   );
   if (!user) throw new AppError(401, "Unauthorized");
-
   if (address) {
     address.name = (user.user as any).name;
     address.email = user.email;
     const name =
       package_name === "bundle"
-        ? "AAC Core Board Lanyards (Bundle)"
-        : package_name === "single" && "AAC Core Board Lanyards (eac)";
+        ? "AAC Core Board Lanyards (Bundle (Boy & Girl): $45)"
+        : package_name === "single" &&
+          "AAC Core Board Lanyards (Price: $25 eac)";
     address.package_name = name as string;
   }
 
@@ -76,8 +76,8 @@ const createPaymentSession = async (
       package_name === "monthly" ? 1 : 12
     }&userId=${
       user?._id
-    }&web=${web}&email=${email}&package_name=${package_name}&address=${JSON.stringify(
-      address
+    }&web=${web}&email=${email}&package_name=${package_name}&address=${encodeURIComponent(
+      JSON.stringify(address)
     )}`,
     cancel_url: config.portia_payment_cancel_url,
   });
@@ -94,8 +94,14 @@ const paymentCallback = async (query: Record<string, any>) => {
     web,
     email,
     package_name,
-    address,
+    address: addressStr,
   } = query;
+
+  let parsedAddress: any = {};
+  if (addressStr) {
+    parsedAddress = JSON.parse(decodeURIComponent(addressStr));
+  }
+
   const paymentSession = await stripe.checkout.sessions.retrieve(session_id);
   const isPaymentExist = await Payment.findOne({ transaction_id });
 
@@ -104,6 +110,7 @@ const paymentCallback = async (query: Record<string, any>) => {
   }
 
   const session = await mongoose.startSession();
+
   if (paymentSession.payment_status === "paid") {
     if (web === "true") {
       const prints = await PrintModel.findOne({ user: userId });
@@ -164,46 +171,57 @@ const paymentCallback = async (query: Record<string, any>) => {
 
     try {
       await Payment.create([paymentData], { session });
-      await Subscription.findOneAndUpdate(
-        { user: userId, web: web === "true" ? true : false },
-        subscriptionData,
-        { session, upsert: true }
-      );
+      if (web) {
+        await Subscription.create([subscriptionData], { session });
+      } else {
+        await Subscription.findOneAndUpdate(
+          { user: userId, web: web === "true" ? true : false },
+          subscriptionData,
+          { session, upsert: true }
+        );
+      }
 
       await session.commitTransaction();
 
       // send email to admin
-      const emailTemplatePath = "./src/app/templates/shippingAddress.html";
-      const parsedAddress = JSON.parse(address);
+      if (package_name === "bundle" || package_name === "single") {
+        const emailTemplatePath = "./src/app/templates/shippingAddress.html";
 
-      fs.readFile(emailTemplatePath, "utf8", (err, data) => {
-        if (err) throw new AppError(500, err.message || "Something went wrong");
+        fs.readFile(emailTemplatePath, "utf8", (err, data) => {
+          if (err)
+            throw new AppError(500, err.message || "Something went wrong");
 
-        const emailContent = data
-          .replace("{{package_name}}", parsedAddress.package_name)
-          .replace("{{customer_name}}", parsedAddress.name)
-          .replace("{{customer_email}}", parsedAddress.email)
-          .replace("{{customer_phone}}", parsedAddress.number)
-          .replace("{{number}}", parsedAddress.number)
-          .replace("{{street_address}}", parsedAddress.street_address)
-          .replace("{{area}}", parsedAddress.area)
-          .replace("{{city}}", parsedAddress.city)
-          .replace("{{state}}", parsedAddress.state)
-          .replace("{{postal_code}}", parsedAddress.postal_code);
+          const emailContent = data
+            .replace("{{package_name}}", parsedAddress.package_name || "N/A")
+            .replace("{{customer_name}}", parsedAddress.name || "N/A")
+            .replace("{{customer_email}}", parsedAddress.email || "N/A")
+            .replace("{{customer_phone}}", parsedAddress.number || "N/A")
+            .replace("{{number}}", parsedAddress.number || "N/A")
+            .replace(
+              "{{street_address}}",
+              parsedAddress.street_address || "N/A"
+            )
+            .replace("{{area}}", parsedAddress.area || "N/A")
+            .replace("{{city}}", parsedAddress.city || "N/A")
+            .replace("{{state}}", parsedAddress.state || "N/A")
+            .replace("{{postal_code}}", parsedAddress.postal_code || "N/A");
 
-        sendEmail(
-          config.admin_email as string,
-          "New Order Placed – AAC Core Board Lanyards",
-          emailContent
-        );
-      });
+          sendEmail(
+            "config.admin_email as string",
+            "New Order Placed – AAC Core Board Lanyards",
+            emailContent
+          );
+        });
+      }
       return {
         message: "Payment successful",
         success: true,
         web: web === "true" ? true : false,
       };
     } catch (error: any) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       throw new AppError(500, error.message || "Error verifying payment");
     } finally {
       session.endSession();

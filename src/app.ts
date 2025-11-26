@@ -12,6 +12,7 @@ app.use(
       "https://huemanexpressions.com",
       "https://www.huemanexpressions.com",
       "https://portiapro.huemanexpressions.com",
+      "http://10.10.10.78:3000",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],

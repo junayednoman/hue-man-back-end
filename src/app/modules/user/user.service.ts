@@ -124,7 +124,6 @@ const updateUser = async (
   email: string,
   payload: Partial<TUserProfile>,
 ) => {
-  // return console.log('payload', payload);
   const user = await UserModel.findOne({ email });
   if (!user) {
     throw new AppError(404, "User not found");

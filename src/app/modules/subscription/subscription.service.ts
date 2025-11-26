@@ -6,15 +6,21 @@ import Payment from "../payment/payment.model";
 import { AppError } from "../../classes/appError";
 import PackageModel from "../packages/packages.model";
 
-const createOrUpdateSubscription = async (userId: string, amount: number, currency: string, package_name: string, duration: number) => {
-  const transaction_id = generateTransactionId()
+const createOrUpdateSubscription = async (
+  userId: string,
+  amount: number,
+  currency: string,
+  package_name: string,
+  duration: number
+) => {
+  const transaction_id = generateTransactionId();
   const paymentData = {
     user: userId,
     amount,
     transaction_id,
     status: "paid",
-    currency
-  }
+    currency,
+  };
 
   const start_date = new Date();
   let end_date = new Date(start_date);
@@ -24,7 +30,12 @@ const createOrUpdateSubscription = async (userId: string, amount: number, curren
 
   if (subscription) {
     const previous_end_date = subscription.end_date;
-    const monthsRemaining = Math.max(0, (previous_end_date.getFullYear() - start_date.getFullYear()) * 12 + previous_end_date.getMonth() - start_date.getMonth());
+    const monthsRemaining = Math.max(
+      0,
+      (previous_end_date.getFullYear() - start_date.getFullYear()) * 12 +
+        previous_end_date.getMonth() -
+        start_date.getMonth()
+    );
     end_date = new Date(start_date);
     end_date.setMonth(start_date.getMonth() + monthsRemaining + duration);
   }
@@ -35,13 +46,16 @@ const createOrUpdateSubscription = async (userId: string, amount: number, curren
     start_date,
     end_date,
     status: "active",
-  }
+  };
 
   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
-    await Subscription.findOneAndUpdate({ user: userId }, subscriptionData, { session, upsert: true });
+    await Subscription.findOneAndUpdate({ user: userId }, subscriptionData, {
+      session,
+      upsert: true,
+    });
     await Payment.create([paymentData], { session });
 
     await session.commitTransaction();
@@ -51,17 +65,11 @@ const createOrUpdateSubscription = async (userId: string, amount: number, curren
   } finally {
     session.endSession();
   }
-}
+};
 
 const getAllSubscriptions = async (query: Record<string, any>) => {
-  const searchableFields = [
-    "name",
-    "email"
-  ];
-  const userQuery = new QueryBuilder(
-    Subscription.find(),
-    query
-  )
+  const searchableFields = ["name", "email"];
+  const userQuery = new QueryBuilder(Subscription.find(), query)
     .search(searchableFields)
     .filter()
     .sort()
@@ -74,17 +82,26 @@ const getAllSubscriptions = async (query: Record<string, any>) => {
 };
 
 const getSingleSubscription = async (id: string) => {
-  const result = await Subscription.findById(id).populate("user", "name email").populate("plan", "name");
+  const result = await Subscription.findById(id)
+    .populate("user", "name email")
+    .populate("plan", "name");
   return result;
 };
 
 const getMySubscription = async (id: string, web: boolean) => {
-  const result = await Subscription.findOne({ user: id, status: "active", web });
   if (web) {
-    return result
+    const result = await Subscription.find({ user: id, status: "active" });
+    return result;
   } else {
-    const packageData = await PackageModel.findOne({ package_name: result?.package_name })
-    return packageData
+    const result = await Subscription.findOne({
+      user: id,
+      status: "active",
+      web,
+    });
+    const packageData = await PackageModel.findOne({
+      package_name: result?.package_name,
+    });
+    return packageData;
   }
 };
 
@@ -92,7 +109,7 @@ const subscriptionServices = {
   createOrUpdateSubscription,
   getAllSubscriptions,
   getSingleSubscription,
-  getMySubscription
+  getMySubscription,
 };
 
 export default subscriptionServices;
