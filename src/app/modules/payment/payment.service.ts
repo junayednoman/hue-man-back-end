@@ -10,17 +10,48 @@ import { printServices } from "../print/print.service";
 import AuthModel from "../auth/auth.model";
 import { PrintModel } from "../print/print.model";
 import { sendEmail } from "../../utils/sendEmail";
+import fs from "fs";
 
 // Initialize the Stripe client
 const stripe = new Stripe(config.stripe_secret_key as string, {
   apiVersion: "2024-12-18.acacia",
 });
 
-const createPaymentSession = async (package_name: 'monthly' | 'yearly' | 'single' | 'bundle' | 'combo', email: string, currency: string, price: number, web = false) => {
-  const user = await AuthModel.findOne({ email });
+const createPaymentSession = async (
+  package_name: "monthly" | "yearly" | "single" | "bundle" | "combo",
+  email: string,
+  currency: string,
+  price: number,
+  web = false,
+  address?: {
+    package_name: string;
+    name: string;
+    email: string;
+    number: string;
+    street_address: string;
+    area: string;
+    city: string;
+    state: string;
+    postal_code?: string;
+  }
+) => {
+  const user = await AuthModel.findOne({ email }).populate(
+    "user",
+    "name email"
+  );
   if (!user) throw new AppError(401, "Unauthorized");
 
-  const transaction_id = generateTransactionId()
+  if (address) {
+    address.name = (user.user as any).name;
+    address.email = user.email;
+    const name =
+      package_name === "bundle"
+        ? "AAC Core Board Lanyards (Bundle)"
+        : package_name === "single" && "AAC Core Board Lanyards (eac)";
+    address.package_name = name as string;
+  }
+
+  const transaction_id = generateTransactionId();
 
   const session = await stripe.checkout.sessions.create({
     line_items: [
@@ -28,7 +59,9 @@ const createPaymentSession = async (package_name: 'monthly' | 'yearly' | 'single
         price_data: {
           currency,
           product_data: {
-            name: `Subscribe to ${package_name?.replace(/^\w/, c => c.toUpperCase())} plan`,
+            name: `Subscribe to ${package_name?.replace(/^\w/, (c) =>
+              c.toUpperCase()
+            )} plan`,
           },
           unit_amount: Math.ceil(price * 100),
         },
@@ -37,24 +70,41 @@ const createPaymentSession = async (package_name: 'monthly' | 'yearly' | 'single
     ],
     mode: "payment",
     customer_email: email,
-    success_url: `${config.payment_success_url}?session_id={CHECKOUT_SESSION_ID}&transaction_id=${transaction_id}&duration=${package_name === "monthly" ? 1 : 12}&userId=${user?._id}&web=${web}&email=${email}&package_name=${package_name}`,
+    success_url: `${
+      config.payment_success_url
+    }?session_id={CHECKOUT_SESSION_ID}&transaction_id=${transaction_id}&duration=${
+      package_name === "monthly" ? 1 : 12
+    }&userId=${
+      user?._id
+    }&web=${web}&email=${email}&package_name=${package_name}&address=${JSON.stringify(
+      address
+    )}`,
     cancel_url: config.portia_payment_cancel_url,
   });
 
   return { url: session.url };
-}
+};
 
 const paymentCallback = async (query: Record<string, any>) => {
-  const { session_id, transaction_id, duration, userId, web, email, package_name } = query;
+  const {
+    session_id,
+    transaction_id,
+    duration,
+    userId,
+    web,
+    email,
+    package_name,
+    address,
+  } = query;
   const paymentSession = await stripe.checkout.sessions.retrieve(session_id);
   const isPaymentExist = await Payment.findOne({ transaction_id });
 
   if (isPaymentExist) {
-    return { web: web === "true" ? true : false }
+    return { web: web === "true" ? true : false };
   }
 
   const session = await mongoose.startSession();
-  if (paymentSession.payment_status === 'paid') {
+  if (paymentSession.payment_status === "paid") {
     if (web === "true") {
       const prints = await PrintModel.findOne({ user: userId });
       if (prints) {
@@ -62,7 +112,6 @@ const paymentCallback = async (query: Record<string, any>) => {
       } else {
         await printServices.createPrints(email);
       }
-
     }
 
     session.startTransaction();
@@ -84,14 +133,24 @@ const paymentCallback = async (query: Record<string, any>) => {
 
     end_date.setMonth(start_date.getMonth() + Number(duration));
 
-    const subscription = await Subscription.findOne({ user: userId, web: web === "true" ? true : false });
+    const subscription = await Subscription.findOne({
+      user: userId,
+      web: web === "true" ? true : false,
+    });
 
     if (web === "false" && subscription) {
       const previous_end_date = subscription.end_date;
       if (previous_end_date && !isNaN(previous_end_date.getTime())) {
-        const monthsRemaining = Math.max(0, (previous_end_date.getFullYear() - start_date.getFullYear()) * 12 + previous_end_date.getMonth() - start_date.getMonth());
+        const monthsRemaining = Math.max(
+          0,
+          (previous_end_date.getFullYear() - start_date.getFullYear()) * 12 +
+            previous_end_date.getMonth() -
+            start_date.getMonth()
+        );
         end_date = new Date(start_date);
-        end_date.setMonth(start_date.getMonth() + monthsRemaining + Number(duration));
+        end_date.setMonth(
+          start_date.getMonth() + monthsRemaining + Number(duration)
+        );
       }
     }
 
@@ -100,15 +159,49 @@ const paymentCallback = async (query: Record<string, any>) => {
       start_date,
       end_date,
       status: "active",
-      package_name
+      package_name,
     };
 
     try {
       await Payment.create([paymentData], { session });
-      await Subscription.findOneAndUpdate({ user: userId, web: web === "true" ? true : false }, subscriptionData, { session, upsert: true });
+      await Subscription.findOneAndUpdate(
+        { user: userId, web: web === "true" ? true : false },
+        subscriptionData,
+        { session, upsert: true }
+      );
 
       await session.commitTransaction();
-      return { message: "Payment successful", success: true, web: web === "true" ? true : false };
+
+      // send email to admin
+      const emailTemplatePath = "./src/app/templates/shippingAddress.html";
+      const parsedAddress = JSON.parse(address);
+
+      fs.readFile(emailTemplatePath, "utf8", (err, data) => {
+        if (err) throw new AppError(500, err.message || "Something went wrong");
+
+        const emailContent = data
+          .replace("{{package_name}}", parsedAddress.package_name)
+          .replace("{{customer_name}}", parsedAddress.name)
+          .replace("{{customer_email}}", parsedAddress.email)
+          .replace("{{customer_phone}}", parsedAddress.number)
+          .replace("{{number}}", parsedAddress.number)
+          .replace("{{street_address}}", parsedAddress.street_address)
+          .replace("{{area}}", parsedAddress.area)
+          .replace("{{city}}", parsedAddress.city)
+          .replace("{{state}}", parsedAddress.state)
+          .replace("{{postal_code}}", parsedAddress.postal_code);
+
+        sendEmail(
+          config.admin_email as string,
+          "New Order Placed – AAC Core Board Lanyards",
+          emailContent
+        );
+      });
+      return {
+        message: "Payment successful",
+        success: true,
+        web: web === "true" ? true : false,
+      };
     } catch (error: any) {
       await session.abortTransaction();
       throw new AppError(500, error.message || "Error verifying payment");
@@ -119,15 +212,8 @@ const paymentCallback = async (query: Record<string, any>) => {
 };
 
 const getAllPayments = async (query: Record<string, any>) => {
-  const searchableFields = [
-    "amount",
-    "status",
-    "transaction_id"
-  ];
-  const userQuery = new QueryBuilder(
-    Payment.find(),
-    query
-  )
+  const searchableFields = ["amount", "status", "transaction_id"];
+  const userQuery = new QueryBuilder(Payment.find(), query)
     .search(searchableFields)
     .filter()
     .sort()
@@ -140,12 +226,24 @@ const getAllPayments = async (query: Record<string, any>) => {
 };
 
 const getSinglePayment = async (id: string) => {
-  const result = await Payment.findOne({ _id: id }).populate("user", "name email");
+  const result = await Payment.findOne({ _id: id }).populate(
+    "user",
+    "name email"
+  );
   return result;
-}
+};
 
-const paymentSessionForPortia = async (price: number, payload: { name: string, email: string, company: string, phone: string, address: string, quantity: number }) => {
-
+const paymentSessionForPortia = async (
+  price: number,
+  payload: {
+    name: string;
+    email: string;
+    company: string;
+    phone: string;
+    address: string;
+    quantity: number;
+  }
+) => {
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
@@ -166,12 +264,12 @@ const paymentSessionForPortia = async (price: number, payload: { name: string, e
   });
 
   return { url: session.url };
-}
+};
 
 const portiaProPaymentCallback = async (query: Record<string, any>) => {
   const { session_id, name, email, company, phone, address, quantity } = query;
   const paymentSession = await stripe.checkout.sessions.retrieve(session_id);
-  if (paymentSession.payment_status === 'paid') {
+  if (paymentSession.payment_status === "paid") {
     const subject = `Portia Pro New User Payment Received - ${name}`;
     const html_markup = `<p>Hi Rashida,</p>
   <p>A new payment has been received on <strong>Portia Pro</strong>. Here are the details:</p>
@@ -201,5 +299,5 @@ export const paymentServices = {
   getSinglePayment,
   paymentCallback,
   paymentSessionForPortia,
-  portiaProPaymentCallback
-}
+  portiaProPaymentCallback,
+};

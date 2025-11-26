@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Purchase Notification</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .email-container {
+        max-width: 650px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #ff7f00;
+        font-size: 24px;
+      }
+      .email-content {
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      table {
+        width: 100%;
+        margin-top: 20px;
+      }
+      table td {
+        padding: 6px 4px;
+        font-size: 15px;
+      }
+      .section-title {
+        font-weight: bold;
+        color: #ff7f00;
+        margin-top: 20px;
+        font-size: 18px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 25px;
+        font-size: 14px;
+        color: #777;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="email-container">
+      <h1>New Purchase Order Received</h1>
+
+      <p class="email-content">Hello Rashida,</p>
+
+      <p class="email-content">
+        A new purchase order has been placed by a customer. Package name is
+        {{package_name}} Below are the order and shipping details:
+      </p>
+
+      <!-- Customer Info -->
+      <p class="section-title">Customer Information</p>
+      <table>
+        <tr>
+          <td><strong>Name:</strong></td>
+          <td>{{customer_name}}</td>
+        </tr>
+        <tr>
+          <td><strong>Email:</strong></td>
+          <td>{{customer_email}}</td>
+        </tr>
+        <tr>
+          <td><strong>Phone:</strong></td>
+          <td>{{customer_phone}}</td>
+        </tr>
+      </table>
+
+      <!-- Shipping Address -->
+      <p class="section-title">Shipping Address</p>
+      <table>
+        <tr>
+          <td><strong>Number:</strong></td>
+          <td>{{number}}</td>
+        </tr>
+        <tr>
+          <td><strong>Street Address:</strong></td>
+          <td>{{street_address}}</td>
+        </tr>
+        <tr>
+          <td><strong>Area:</strong></td>
+          <td>{{area}}</td>
+        </tr>
+        <tr>
+          <td><strong>City:</strong></td>
+          <td>{{city}}</td>
+        </tr>
+        <tr>
+          <td><strong>State:</strong></td>
+          <td>{{state}}</td>
+        </tr>
+        <tr>
+          <td><strong>Postal Code:</strong></td>
+          <td>{{postal_code}}</td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

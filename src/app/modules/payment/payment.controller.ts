@@ -10,20 +10,26 @@ const createPaymentSession = handleAsyncRequest(async (req: any, res) => {
   const price = req.body.price;
   const web = req.body.web;
 
-  const result = await paymentServices.createPaymentSession(package_name, email, currency, price, web);
+  const result = await paymentServices.createPaymentSession(
+    package_name,
+    email,
+    currency,
+    price,
+    web
+  );
   successResponse(res, {
     message: "Payment session created successfully!",
     data: result,
-    status: 201
+    status: 201,
   });
 });
 
 const getAllPayments = handleAsyncRequest(async (req, res) => {
-  const query = req.query
+  const query = req.query;
   const result = await paymentServices.getAllPayments(query);
   successResponse(res, {
     message: "Payments retrieved successfully!",
-    data: result
+    data: result,
   });
 });
 
@@ -32,7 +38,7 @@ const paymentCallback = handleAsyncRequest(async (req: any, res) => {
   const result = await paymentServices.paymentCallback(query);
   if (!result.web) {
     successResponse(res, {
-      message: "Payment successful!"
+      message: "Payment successful!",
     });
   } else if (result?.success && result.web) {
     return res.redirect(config.payment_success_page!);
@@ -40,20 +46,23 @@ const paymentCallback = handleAsyncRequest(async (req: any, res) => {
 });
 
 const getSinglePayment = handleAsyncRequest(async (req, res) => {
-  const id = req.params.id
+  const id = req.params.id;
   const result = await paymentServices.getSinglePayment(id);
   successResponse(res, {
     message: "Payment retrieved successfully!",
-    data: result
+    data: result,
   });
 });
 
 const paymentSessionForPortia = handleAsyncRequest(async (req, res) => {
-  const result = await paymentServices.paymentSessionForPortia(req.body.price, req.body.payload);
+  const result = await paymentServices.paymentSessionForPortia(
+    req.body.price,
+    req.body.payload
+  );
   successResponse(res, {
     message: "Payment session created successfully!",
     data: result,
-    status: 201
+    status: 201,
   });
 });
 
@@ -69,7 +78,7 @@ const paymentControllers = {
   paymentCallback,
   createPaymentSession,
   paymentSessionForPortia,
-  portiaProPaymentCallback
+  portiaProPaymentCallback,
 };
 
 export default paymentControllers;
