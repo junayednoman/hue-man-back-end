@@ -98,7 +98,7 @@ const paymentCallback = async (query: Record<string, any>) => {
   } = query;
 
   let parsedAddress: any = {};
-  if (addressStr) {
+  if (package_name !== "combo" && addressStr) {
     parsedAddress = JSON.parse(decodeURIComponent(addressStr));
   }
 
