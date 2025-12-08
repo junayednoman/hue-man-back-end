@@ -29,10 +29,11 @@ const createPaymentSession = async (
     email: string;
     number: string;
     street_address: string;
-    area: string;
+    apartment: string;
     city: string;
     state: string;
     postal_code?: string;
+    type?: "boy" | "girl";
   }
 ) => {
   const user = await AuthModel.findOne({ email }).populate(
@@ -201,13 +202,14 @@ const paymentCallback = async (query: Record<string, any>) => {
               "{{street_address}}",
               parsedAddress.street_address || "N/A"
             )
-            .replace("{{area}}", parsedAddress.area || "N/A")
+            .replace("{{apartment}}", parsedAddress.apartment || "N/A")
+            .replace("{{type}}", parsedAddress.type || "N/A")
             .replace("{{city}}", parsedAddress.city || "N/A")
             .replace("{{state}}", parsedAddress.state || "N/A")
             .replace("{{postal_code}}", parsedAddress.postal_code || "N/A");
 
           sendEmail(
-            "config.admin_email as string",
+            config.admin_email as string,
             "New Order Placed – AAC Core Board Lanyards",
             emailContent
           );
