@@ -62,11 +62,16 @@ const getAllCards = async (query: Record<string, any>) => {
 const getSingleCard = async (id: string, userId: string) => {
   const card = await CardModel.findById(id);
   const customVoice = await CustomVoice.findOne({ user: userId, card: id }).lean();
+  const allCards = await CardModel.find({ category: card?.category }).sort({
+    index: 1,
+  });
+  const categoryCardIds = allCards.map((card) => card._id.toString());
   if (card && customVoice) {
     const result = { ...card.toObject(), custom_voice: customVoice.voice };
-    return result;
+    return { card: result, categoryCardIds };
   }
-  return card;
+
+  return { card, categoryCardIds };
 }
 
 const updateCard = async (id: string, payload: TCard) => {
