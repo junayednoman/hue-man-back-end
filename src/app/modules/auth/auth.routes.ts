@@ -13,6 +13,7 @@ import userControllers from "../user/user.controller";
 import authVerify from "../../middlewares/authVerify";
 
 const authRouters = Router();
+
 authRouters.post(
   "/sign-up",
   handleZodValidation(userSignupValidationSchema),
