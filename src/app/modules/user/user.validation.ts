@@ -13,8 +13,9 @@ password: z
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
-  parent_id: z.string().optional(),
 });
+
+export const subAccountValidationSchema = userSignupValidationSchema;
 
 // Zod Validation Schema
 export const userUpdateValidationSchema = z.object({

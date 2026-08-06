@@ -3,7 +3,7 @@ import { TPackage } from "./packages.interface";
 import PackageModel from "./packages.model";
 
 const getAllPackages = async () => {
-  const packages = await PackageModel.find();
+  const packages = await PackageModel.find({ is_active: true }).sort({ monthly_price: 1 });
   return packages;
 }
 
@@ -25,10 +25,15 @@ const updatePackage = async (id: string, payload: Partial<TPackage>) => {
   return result;
 }
 
+const createPackage = async (payload: TPackage) => {
+  return PackageModel.create(payload);
+}
+
 const packageServices = {
   getAllPackages,
   getSinglePackage,
-  updatePackage
+  updatePackage,
+  createPackage
 }
 
 export default packageServices;

@@ -8,7 +8,7 @@ import {
   verifyOtpSchema,
 } from "./auth.validation";
 import AuthController from "./auth.controller";
-import { userSignupValidationSchema } from "../user/user.validation";
+import { subAccountValidationSchema, userSignupValidationSchema } from "../user/user.validation";
 import userControllers from "../user/user.controller";
 import authVerify from "../../middlewares/authVerify";
 
@@ -48,6 +48,12 @@ authRouters.get(
   "/sub-accounts",
   authVerify(["user"]),
   AuthController.getSubAccounts
+);
+authRouters.post(
+  "/sub-accounts",
+  authVerify(["user"]),
+  handleZodValidation(subAccountValidationSchema),
+  AuthController.createSubAccount,
 );
 authRouters.delete(
   "/sub-accounts/:subAccountId",

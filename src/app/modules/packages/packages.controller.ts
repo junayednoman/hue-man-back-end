@@ -32,10 +32,20 @@ const updatePackage = handleAsyncRequest(
   }
 )
 
+const createPackage = handleAsyncRequest(async (req, res) => {
+  const result = await packageServices.createPackage(req.body);
+  successResponse(res, {
+    message: "Package created successfully!",
+    data: result,
+    status: 201,
+  });
+});
+
 const packageController = {
   getAllPackages,
   getSinglePackage,
-  updatePackage
+  updatePackage,
+  createPackage
 }
 
 export default packageController;

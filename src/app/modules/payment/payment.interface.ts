@@ -4,6 +4,7 @@ export interface TPayment {
   user: ObjectId;
   amount: number;
   transaction_id: string;
+  checkout_session_id?: string;
   status: string;
   currency: string;
 }

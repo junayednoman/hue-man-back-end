@@ -10,9 +10,9 @@ import { TUserProfile } from "./user.interface";
 import { deleteFile } from "../../utils/deleteFile";
 import generateOTP from "../../utils/generateOTP";
 import { sendEmail } from "../../utils/sendEmail";
+import Subscription from "../subscription/subscription.model";
 
-const signUp = async (payload: TSignUp) => {
-  console.log('payload', payload);
+const signUp = async (payload: TSignUp & { parent_id?: string }) => {
   // check if user exists
   const auth = await AuthModel.findOne({ email: payload.email, is_account_verified: true });
   if (auth) {
@@ -74,6 +74,33 @@ const signUp = async (payload: TSignUp) => {
   } finally {
     session.endSession();
   }
+};
+
+const createSubAccount = async (parentId: string, payload: TSignUp) => {
+  const subscription = await Subscription.findOne({
+    user: parentId,
+    web: false,
+    status: "active",
+    end_date: { $gt: new Date() },
+  }).populate("package");
+  if (!subscription) {
+    throw new AppError(403, "An active subscription is required to add sub-users");
+  }
+
+  const packageItem = subscription.package as any;
+  const limit = packageItem?.sub_user_limit;
+  if (typeof limit !== "number") {
+    throw new AppError(500, "Subscription package has no sub-user limit");
+  }
+  const used = await AuthModel.countDocuments({
+    parent_id: parentId,
+    is_deleted: false,
+    is_blocked: false,
+  });
+  if (used >= limit) {
+    throw new AppError(403, `Your ${packageItem.name} plan allows up to ${limit} sub-users`);
+  }
+  return signUp({ ...payload, parent_id: parentId });
 };
 
 const getAllUsers = async (query: Record<string, any>) => {
@@ -191,6 +218,7 @@ const deleteUser = async (_id: string, userEmail: string) => {
 
 const userServices = {
   signUp,
+  createSubAccount,
   getAllUsers,
   getSingleUser,
   updateUser,

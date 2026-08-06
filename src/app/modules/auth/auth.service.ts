@@ -8,17 +8,22 @@ import generateOTP from "../../utils/generateOTP";
 import isUserExist from "../../utils/isUserExist";
 import { sendEmail } from "../../utils/sendEmail";
 
-const loginUser = async (payload: { email: string; password: string, is_remember?: boolean }) => {
+const loginUser = async (payload: {
+  email: string;
+  password: string;
+  is_remember?: boolean;
+}) => {
   const user = await isUserExist(payload.email);
 
-  if (!user.is_account_verified) throw new AppError(StatusCodes.BAD_REQUEST, "Account not verified");
+  if (!user.is_account_verified)
+    throw new AppError(StatusCodes.BAD_REQUEST, "Account not verified");
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(payload.password, user.password);
   if (!isPasswordMatch) {
     throw new AppError(
       StatusCodes.UNAUTHORIZED,
       "Incorrect password",
-      "password"
+      "password",
     );
   }
 
@@ -29,13 +34,21 @@ const loginUser = async (payload: { email: string; password: string, is_remember
     id: user._id,
   };
 
-  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: config.jwt_access_expiration,
-  });
+  const accessToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    {
+      expiresIn: config.jwt_access_expiration,
+    },
+  );
 
-  const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
-    expiresIn: payload?.is_remember ? "30d" : "3d",
-  });
+  const refreshToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    {
+      expiresIn: payload?.is_remember ? "30d" : "3d",
+    },
+  );
   return { accessToken, refreshToken, role: user.role };
 };
 
@@ -46,7 +59,7 @@ const sendOtp = async (payload: { email: string }) => {
   const otp = generateOTP();
   const hashedOtp = await bcrypt.hash(
     otp.toString(),
-    Number(config.salt_rounds)
+    Number(config.salt_rounds),
   );
 
   // prepare email content
@@ -57,16 +70,16 @@ const sendOtp = async (payload: { email: string }) => {
   <h2 style="color: #2e6c80;">${otp}</h2>
   <p>This OTP is valid for 3 minutes. If you did not request this, please ignore this email or contact our support team.</p>
   <p>Thank you,</p>
-  <p>Hue-man Expressions</p>`
+  <p>Hue-man Expressions</p>`;
 
   sendEmail(payload.email, subject, html_markup);
 
   await AuthModel.findByIdAndUpdate(
     user._id,
     { otp: hashedOtp, otp_expires, otp_attempts: 0 },
-    { new: true }
+    { new: true },
   );
-  return { email: payload.email }
+  return { email: payload.email };
 };
 
 const verifyOtp = async (payload: {
@@ -109,6 +122,7 @@ const verifyOtp = async (payload: {
     <p>Hue-man Expressions</p>`;
 
     sendEmail(payload.email, subject, htmlMarkup);
+
     return await AuthModel.findByIdAndUpdate(user._id, {
       is_account_verified: true,
       $unset: { otp: "", otp_expires: "", otp_attempts: "" },
@@ -134,7 +148,7 @@ const resetForgottenPassword = async (payload: {
   // hash the password and save the document
   const hashedPassword = await bcrypt.hash(
     payload.password,
-    Number(config.salt_rounds)
+    Number(config.salt_rounds),
   );
   const newAuth = await AuthModel.findByIdAndUpdate(user._id, {
     password: hashedPassword,
@@ -154,29 +168,32 @@ const resetForgottenPassword = async (payload: {
   }
 };
 
-const createNewPassword = async (email: string, payload: {
-  oldPassword: string;
-  newPassword: string;
-}) => {
+const createNewPassword = async (
+  email: string,
+  payload: {
+    oldPassword: string;
+    newPassword: string;
+  },
+) => {
   const user = await isUserExist(email);
 
   // Compare the password
   const isPasswordMatch = await bcrypt.compare(
     payload.oldPassword,
-    user.password
+    user.password,
   );
   if (!isPasswordMatch) {
     throw new AppError(
       StatusCodes.UNAUTHORIZED,
       "Incorrect password",
-      "password"
+      "password",
     );
   }
 
   // hash the new password and save the document
   const hashedPassword = await bcrypt.hash(
     payload.newPassword,
-    Number(config.salt_rounds)
+    Number(config.salt_rounds),
   );
 
   await AuthModel.findByIdAndUpdate(user._id, { password: hashedPassword });
@@ -188,28 +205,39 @@ const createNewPassword = async (email: string, payload: {
     id: user._id,
   };
 
-  const accessToken = jsonwebtoken.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: config.jwt_access_expiration,
-  });
+  const accessToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    {
+      expiresIn: config.jwt_access_expiration,
+    },
+  );
 
-  const refreshToken = jsonwebtoken.sign(jwtPayload, config.jwt_refresh_secret as string, {
-    expiresIn: "3d",
-  });
+  const refreshToken = jsonwebtoken.sign(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    {
+      expiresIn: "3d",
+    },
+  );
   return { accessToken, refreshToken, role: user.role };
 };
 
 const getSubAccounts = async (userId: string) => {
-  const subAccounts = await AuthModel.find({ parent_id: userId }).populate("user", "name email image").select("user role parent_id");
-  return subAccounts
-}
+  const subAccounts = await AuthModel.find({ parent_id: userId })
+    .populate("user", "name email image")
+    .select("user role parent_id");
+  return subAccounts;
+};
 
 const deleteSubAccount = async (userId: string, subAccountId: string) => {
-  const subAccount = await AuthModel.findById(subAccountId)
-  if (!subAccount) throw new AppError(404, "Sub account not found")
-  if (userId !== String(subAccount.parent_id)) throw new AppError(403, "Forbidden")
-  const result = await AuthModel.findByIdAndDelete(subAccountId)
-  return result
-}
+  const subAccount = await AuthModel.findById(subAccountId);
+  if (!subAccount) throw new AppError(404, "Sub account not found");
+  if (userId !== String(subAccount.parent_id))
+    throw new AppError(403, "Forbidden");
+  const result = await AuthModel.findByIdAndDelete(subAccountId);
+  return result;
+};
 
 const AuthServices = {
   loginUser,
@@ -218,7 +246,7 @@ const AuthServices = {
   resetForgottenPassword,
   createNewPassword,
   getSubAccounts,
-  deleteSubAccount
+  deleteSubAccount,
 };
 
 export default AuthServices;

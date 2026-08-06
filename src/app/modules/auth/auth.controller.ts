@@ -2,6 +2,7 @@ import config from "../../config";
 import handleAsyncRequest from "../../utils/handleAsyncRequest";
 import { successResponse } from "../../utils/successResponse";
 import AuthServices from "./auth.service";
+import userServices from "../user/user.service";
 
 const loginUser = handleAsyncRequest(async (req, res) => {
   const payload = req.body;
@@ -98,6 +99,15 @@ const deleteSubAccount = handleAsyncRequest(async (req: any, res) => {
   });
 });
 
+const createSubAccount = handleAsyncRequest(async (req: any, res) => {
+  const result = await userServices.createSubAccount(req.user.id, req.body);
+  successResponse(res, {
+    message: "Sub-account created successfully!",
+    data: result,
+    status: 201,
+  });
+});
+
 const AuthController = {
   loginUser,
   sendOtp,
@@ -105,6 +115,7 @@ const AuthController = {
   resetForgottenPassword,
   createNewPassword,
   getSubAccounts,
+  createSubAccount,
   deleteSubAccount
 };
 

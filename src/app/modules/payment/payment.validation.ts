@@ -1,10 +1,24 @@
 import { z } from "zod";
 
-export const paymentValidationSchema = z.object({
-  package_name: z.enum(['monthly', 'yearly', 'single', 'bundle', 'combo']),
-  currency: z.string().optional(),
-  price: z.number().positive('Price must be a positive number'),
-})
+const subscriptionPaymentSchema = z.object({
+  package_id: z.string().trim().nonempty("Package id is required"),
+  billing_interval: z.enum(["monthly", "yearly"]),
+  currency: z.string().trim().length(3).optional(),
+  web: z.boolean().optional(),
+});
+
+const productPaymentSchema = z.object({
+  package_name: z.enum(["single", "bundle", "combo"]),
+  currency: z.string().trim().length(3).optional(),
+  price: z.number().positive("Price must be a positive number"),
+  web: z.boolean().optional(),
+  address: z.record(z.unknown()).optional(),
+});
+
+export const paymentValidationSchema = z.union([
+  subscriptionPaymentSchema,
+  productPaymentSchema,
+]);
 
 export const portiaPaymentSchema = z.object({
   price: z

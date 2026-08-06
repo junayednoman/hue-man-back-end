@@ -4,21 +4,10 @@ import { successResponse } from "../../utils/successResponse";
 import { paymentServices } from "./payment.service";
 
 const createPaymentSession = handleAsyncRequest(async (req: any, res) => {
-  const package_name = req.body.package_name;
-  const email = req.user.email;
-  const currency = req.body.currency || "usd";
-  const price = req.body.price;
-  const web = req.body.web;
-  const address = req.body.address;
-
-  const result = await paymentServices.createPaymentSession(
-    package_name,
-    email,
-    currency,
-    price,
-    web,
-    address
-  );
+  const result = await paymentServices.createPaymentSession({
+    ...req.body,
+    email: req.user.email,
+  });
   successResponse(res, {
     message: "Payment session created successfully!",
     data: result,
@@ -49,7 +38,7 @@ const paymentCallback = handleAsyncRequest(async (req: any, res) => {
 
 const getSinglePayment = handleAsyncRequest(async (req, res) => {
   const id = req.params.id;
-  const result = await paymentServices.getSinglePayment(id);
+  const result = await paymentServices.getSinglePayment(id, (req as any).user);
   successResponse(res, {
     message: "Payment retrieved successfully!",
     data: result,
