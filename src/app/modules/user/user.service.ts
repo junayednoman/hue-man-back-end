@@ -14,7 +14,10 @@ import Subscription from "../subscription/subscription.model";
 
 const signUp = async (payload: TSignUp & { parent_id?: string }) => {
   // check if user exists
-  const auth = await AuthModel.findOne({ email: payload.email, is_account_verified: true });
+  const auth = await AuthModel.findOne({
+    email: payload.email,
+    is_account_verified: true,
+  });
   if (auth) {
     throw new AppError(400, "User already exists");
   }
@@ -27,16 +30,14 @@ const signUp = async (payload: TSignUp & { parent_id?: string }) => {
     // Create auth data
     const hashedPassword = await bcrypt.hash(
       password,
-      Number(config.salt_rounds)
+      Number(config.salt_rounds),
     );
-
-
 
     // generate OTP and send email
     const otp = generateOTP();
     const hashedOtp = await bcrypt.hash(
       otp.toString(),
-      Number(config.salt_rounds)
+      Number(config.salt_rounds),
     );
 
     const otp_expires = new Date(Date.now() + 3 * 60 * 1000);
@@ -57,10 +58,18 @@ const signUp = async (payload: TSignUp & { parent_id?: string }) => {
       otp_attempts: 0,
     } as any;
 
-    const newUser = await UserModel.findOneAndUpdate({ email: payload.email }, userData, { session, upsert: true, new: true });
+    const newUser = await UserModel.findOneAndUpdate(
+      { email: payload.email },
+      userData,
+      { session, upsert: true, new: true },
+    );
 
-    authData.user = newUser?._id
-    await AuthModel.findOneAndUpdate({ email: payload.email }, authData, { session, upsert: true, new: true });
+    authData.user = newUser?._id;
+    await AuthModel.findOneAndUpdate({ email: payload.email }, authData, {
+      session,
+      upsert: true,
+      new: true,
+    });
 
     if (newUser) {
       sendEmail(payload.email, subject, htmlMarkup);
@@ -84,7 +93,10 @@ const createSubAccount = async (parentId: string, payload: TSignUp) => {
     end_date: { $gt: new Date() },
   }).populate("package");
   if (!subscription) {
-    throw new AppError(403, "An active subscription is required to add sub-users");
+    throw new AppError(
+      403,
+      "An active subscription is required to add sub-users",
+    );
   }
 
   const packageItem = subscription.package as any;
@@ -98,25 +110,23 @@ const createSubAccount = async (parentId: string, payload: TSignUp) => {
     is_blocked: false,
   });
   if (used >= limit) {
-    throw new AppError(403, `Your ${packageItem.name} plan allows up to ${limit} sub-users`);
+    throw new AppError(
+      403,
+      `Your ${packageItem.name} plan allows up to ${limit} sub-users`,
+    );
   }
   return signUp({ ...payload, parent_id: parentId });
 };
 
 const getAllUsers = async (query: Record<string, any>) => {
-  const searchableFields = [
-    "name",
-    "email",
-    "gender",
-    "age",
-  ];
+  const searchableFields = ["name", "email", "gender", "age"];
 
   const userQuery = new QueryBuilder(
     UserModel.find({
       is_deleted: false,
       is_blocked: false,
     }),
-    query
+    query,
   )
     .search(searchableFields)
     .filter()
@@ -147,10 +157,7 @@ const getProfile = async (email: string) => {
   return { ...user?.toObject(), user_id: auth?._id };
 };
 
-const updateUser = async (
-  email: string,
-  payload: Partial<TUserProfile>,
-) => {
+const updateUser = async (email: string, payload: Partial<TUserProfile>) => {
   const user = await UserModel.findOne({ email });
   if (!user) {
     throw new AppError(404, "User not found");
@@ -195,14 +202,14 @@ const deleteUser = async (_id: string, userEmail: string) => {
     const result = await UserModel.findByIdAndUpdate(
       user._id,
       { is_deleted: true },
-      { session, new: true }
+      { session, new: true },
     );
 
     // Update related AuthModel record
     await AuthModel.findOneAndUpdate(
       { email: user.email },
       { is_deleted: true },
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
@@ -223,6 +230,6 @@ const userServices = {
   getSingleUser,
   updateUser,
   deleteUser,
-  getProfile
+  getProfile,
 };
 export default userServices;
