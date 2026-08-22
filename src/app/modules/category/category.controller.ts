@@ -53,6 +53,15 @@ const getAllCategories = handleAsyncRequest(async (req, res) => {
   });
 });
 
+const getNestedCategories = handleAsyncRequest(async (req, res) => {
+  const query = req.query;
+  const result = await categoryServices.getNestedCategories(query);
+  successResponse(res, {
+    message: "Categories retrieved successfully!",
+    data: result,
+  });
+});
+
 const getSingleCategory = handleAsyncRequest(async (req, res) => {
   const id = req.params.id;
   const result = await categoryServices.getSingleCategory(id);
@@ -98,6 +107,7 @@ const deleteCategory = handleAsyncRequest(async (req, res) => {
 const categoryControllers = {
   createCategory,
   getAllCategories,
+  getNestedCategories,
   getSingleCategory,
   updateCategory,
   deleteCategory,

@@ -55,6 +55,49 @@ const getAllCategories = async (query: Record<string, any>) => {
   return { data: result, meta };
 };
 
+const getNestedCategories = async (query: Record<string, any>) => {
+  const categoryQuery = new QueryBuilder(
+    CategoryModel.find({ parent: null, is_deleted: false }),
+    { ...query, limit: 100000 },
+  )
+    .search(["name"])
+    .filter()
+    .sort()
+    .paginate()
+    .selectFields();
+
+  const meta = await categoryQuery.countTotal();
+  const mainCategories = await categoryQuery.queryModel.lean();
+  const mainCategoryIds = mainCategories.map((category) => category._id);
+
+  const childCategories = await CategoryModel.find({
+    is_deleted: false,
+    _id: { $nin: mainCategoryIds },
+  })
+    .sort({ index: 1, createdAt: -1 })
+    .lean();
+
+  const childrenByParent = new Map<string, any[]>();
+  for (const category of childCategories) {
+    const parentId = String(category.parent);
+    const children = childrenByParent.get(parentId) || [];
+    children.push(category);
+    childrenByParent.set(parentId, children);
+  }
+
+  const addNestedChildren = (category: any): any => ({
+    ...category,
+    sub_categories: (childrenByParent.get(String(category._id)) || []).map(
+      addNestedChildren,
+    ),
+  });
+
+  return {
+    data: mainCategories.map(addNestedChildren),
+    meta,
+  };
+};
+
 const getSingleCategory = async (_id: string) => {
   const result = await CategoryModel.findOne({ _id, is_deleted: false });
   if (!result) throw new AppError(404, "Category not found");
@@ -103,6 +146,7 @@ const deleteCategory = async (_id: string) => {
 const categoryServices = {
   createCategory,
   getAllCategories,
+  getNestedCategories,
   getSingleCategory,
   updateCategory,
   deleteCategory,

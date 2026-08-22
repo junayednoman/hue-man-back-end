@@ -22,4 +22,8 @@ export default {
   portia_payment_cancel_url: process.env.PORTIA_PAYMENT_CANCEL,
   portia_payment_callback: process.env.PORTIA_PAYMENT_CALLBACK,
   admin_email: process.env.ADMIN_EMAIL,
+  seed_admin_name: process.env.ADMIN_LOGIN_NAME,
+  seed_admin_email: process.env.ADMIN_LOGIN_EMAIL,
+  seed_admin_password: process.env.ADMIN_LOGIN_PASSWORD,
+  seed_admin_phone: process.env.ADMIN_LOGIN_PHONE,
 };

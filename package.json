@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "lint:fix": "npx eslint src --fix",
     "prettier": "prettier --ignore-path .gitignore --write \"src/**/*.+(js|ts|json)\"",
-    "seed:subscription-packages": "ts-node src/scripts/seedSubscriptionPackages.ts"
+    "seed:subscription-packages": "ts-node src/scripts/seedSubscriptionPackages.ts",
+    "seed:admin": "ts-node src/scripts/seedAdmin.ts"
   },
   "keywords": [],
   "author": "",

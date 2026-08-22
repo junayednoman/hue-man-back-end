@@ -8,31 +8,27 @@ const categoryRouters = Router();
 categoryRouters.post(
   "/",
   uploadSingleImage,
-  categoryControllers.createCategory
+  categoryControllers.createCategory,
 );
 
 categoryRouters.post(
   "/many",
   handleZodValidation(createManyCategoriesValidationSchema),
-  categoryControllers.createManyCategories
+  categoryControllers.createManyCategories,
 );
 
 categoryRouters.get("/", categoryControllers.getAllCategories);
 
-categoryRouters.get(
-  "/:id",
-  categoryControllers.getSingleCategory
-);
+categoryRouters.get("/nested", categoryControllers.getNestedCategories);
+
+categoryRouters.get("/:id", categoryControllers.getSingleCategory);
 
 categoryRouters.put(
   "/:id",
   uploadSingleImage,
-  categoryControllers.updateCategory
+  categoryControllers.updateCategory,
 );
 
-categoryRouters.delete(
-  "/:id",
-  categoryControllers.deleteCategory
-);
+categoryRouters.delete("/:id", categoryControllers.deleteCategory);
 
 export default categoryRouters;
