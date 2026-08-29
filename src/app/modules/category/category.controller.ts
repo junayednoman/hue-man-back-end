@@ -22,6 +22,7 @@ const createCategory = handleAsyncRequest(async (req, res) => {
     image,
     name: textData.name,
     index: textData.index,
+    parent: textData.parent,
   };
 
   handleZodValidation(categoryCreateValidationSchema);

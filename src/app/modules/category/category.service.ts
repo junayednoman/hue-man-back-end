@@ -11,7 +11,7 @@ const createCategory = async (payload: TCategory) => {
     await deleteFile(payload.image);
     throw new AppError(400, "Category already exists");
   }
-
+  console.log("payload", payload);
   const result = await CategoryModel.create(payload);
   return result;
 };

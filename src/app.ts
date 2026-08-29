@@ -13,7 +13,7 @@ app.use(
       "https://www.huemanexpressions.com",
       "https://portiapro.huemanexpressions.com",
       "http://10.10.10.78:3000",
-      "http://10.10.28.34:3000",
+      "http://10.10.28.34:3001",
       "http://dashboard.huemanexpressions.com",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
