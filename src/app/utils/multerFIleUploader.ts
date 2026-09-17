@@ -2,10 +2,25 @@ import multer from "multer";
 import path from "path";
 import { Request } from "express";
 import { Express } from "express";
+import { AppError } from "../classes/appError";
 
 // Set allowed file types for images and audio
-const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"];
-const allowedAudioTypes = ["audio/mp3", "audio/m4a", "audio/mpeg", "audio/wav", "audio/ogg", "audio/mp4"];
+const allowedImageTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/jpg",
+  "image/gif",
+  "image/webp",
+];
+const allowedAudioTypes = [
+  "audio/mp3",
+  "audio/m4a",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/mp4",
+  "audio/x-m4a",
+];
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -15,7 +30,7 @@ const storage = multer.diskStorage({
     } else if (allowedAudioTypes.includes(file.mimetype)) {
       cb(null, path.join(__dirname, "../../../uploads/audio")); // Audio folder
     } else {
-      cb(new Error("Unsupported file type"), ""); // Throw error for unsupported types
+      cb(new AppError(400, file.mimetype), ""); // Throw error for unsupported types
     }
   },
   filename: (req, file, cb) => {
@@ -25,11 +40,18 @@ const storage = multer.diskStorage({
 });
 
 // File filter to ensure correct file types
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  if (allowedImageTypes.includes(file.mimetype) || allowedAudioTypes.includes(file.mimetype)) {
+const fileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback,
+) => {
+  if (
+    allowedImageTypes.includes(file.mimetype) ||
+    allowedAudioTypes.includes(file.mimetype)
+  ) {
     cb(null, true);
   } else {
-    cb(new Error("Invalid file type. Only images and audio files are allowed."));
+    cb(new AppError(400, file.mimetype));
   }
 };
 
